@@ -1,5 +1,9 @@
 name: "SAST Triage"
 on:
+  push:
+    branches:
+      - master
+      - main
   pull_request:
   workflow_dispatch:
 permissions:
@@ -17,7 +21,7 @@ jobs:
             https://github.com/opengrep/opengrep/releases/download/v1.25.0/opengrep_manylinux_x86
           chmod +x /usr/local/bin/opengrep
           git clone --depth 1 https://github.com/opengrep/opengrep-rules /tmp/rules
-          opengrep scan -f /tmp/rules/javascript -f /tmp/rules/typescript \
+          opengrep scan -f /tmp/rules/java \
             --sarif --dataflow-traces --output findings.sarif
 
       - name: "opengrep findings"
@@ -34,3 +38,4 @@ jobs:
             jq -r "$results | group_by(.level // \"warning\")[] | \"\(.[0].level // \"warning\"): \(length)\"" findings.sarif
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
+
