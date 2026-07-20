@@ -53,7 +53,7 @@ jobs:
         uses: alexpermiakov/sast-triage@v1
         with:
           provider: openai
-          model: deepseek-v4-flash
+          model: deepseek-v4-pro
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           base-url: https://api.deepseek.com
           max-findings-budget: 1000
