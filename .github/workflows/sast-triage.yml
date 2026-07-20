@@ -56,7 +56,7 @@ jobs:
           model: deepseek-v4-pro
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           base-url: https://api.deepseek.com
-          max-findings-budget: 1000
+          max-findings-budget: 10
           triaged-sarif: triaged.sarif
           link-base: https://github.com/${{ github.repository }}/blob/${{ github.event.pull_request.head.sha || github.sha }}
           fail-on-new-exploitable: ${{ github.event_name == 'pull_request' }}
