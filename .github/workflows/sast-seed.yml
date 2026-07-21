@@ -1,11 +1,18 @@
-name: "SAST Triage"
+name: "SAST Seed"
+
 on:
-  push:
-    branches:
-      - master
-      - main
-  pull_request:
   workflow_dispatch:
+    inputs:
+      model:
+        description: "Model to triage with, e.g. deepseek-v4-flash or claude-sonnet-5"
+        type: string
+        required: true
+        default: deepseek-v4-flash
+      base_url:
+        description: "OpenAI-compatible endpoint — clear it to use Claude's native API instead"
+        type: string
+        required: false
+        default: https://api.deepseek.com/v1
 
 # contents:write + pull-requests:write let the cache-review PR step push a
 # branch and open the PR. On fork PRs the token is read-only, which is why that
@@ -19,7 +26,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  triage:
+  seed:
     runs-on: ubuntu-latest
     steps:
       - name: "Check out Git repository"
@@ -58,6 +65,9 @@ jobs:
           base-url: https://api.deepseek.com
           max-findings-budget: 10
           sarif: findings.sarif
+          scope: full
+          mode: baseline
+          cache-write: pr
           link-base: https://github.com/${{ github.repository }}/blob/${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: "Publish triage report to run summary"
