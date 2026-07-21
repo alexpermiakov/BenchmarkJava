@@ -1,4 +1,4 @@
-name: "SAST Triage"
+name: "SAST Seed"
 
 on:
   workflow_dispatch:
