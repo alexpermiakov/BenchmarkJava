@@ -1,0 +1,168 @@
+{
+  "version": 1,
+  "entries": {
+    "00f6a3076bed5c035b341a3f32fe31bbec35503c13fa754abed89a9f67e68a4c85e235b5e12e1d5e8ff406720ce4bde2bf49abf8d4e5dd00d273a8f193e0b52c_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00091.java",
+      "verdict": "exploitable",
+      "reason": "The attacker-controlled cookie value ('bar', line 66) is placed directly into the environment array 'argsEnv' (line 72) and passed to Runtime.exec(args, argsEnv) on line 77. Since envp entries follow the 'name=value' format, an attacker can set arbitrary environment variables (e.g., PATH, LD_PRELOAD, IFS) that influence how the subprocess behaves when the script at the static command path executes. This constitutes OS command injection because environment variables can redirect which binaries the subprocess runs.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00091.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00091.java:66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00091.java:72",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00091.java:77"
+      ],
+      "codeHash": "sha256:c698462b31181e958a2519617f64a00e44b9407c08aadd429de53a83984520dc",
+      "model": "deepseek-v4-flash",
+      "decidedAt": "2026-07-21T12:06:06Z",
+      "tokensUsed": 28867
+    },
+    "014b0ed5775851bd7ded0eda04909d952a6b0f6d5a3cfebb2fd39182a0150e5e3980dd174b197445ea13463f923215522654ff0bc08ee868306c34b9a6a38eba_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01360.java",
+      "verdict": "exploitable",
+      "reason": "The HTTP request parameter 'BenchmarkTest01360' is retrieved via request.getParameterMap() (line 43) and flows through map.get() (line 46), values[0] (line 47), and the inner class doSomething() method (lines 50, 80-95) which unconditionally assigns param to bar when switchTarget='C' (which it is, since guess='ABC' and charAt(2)='C'). The resulting bar is concatenated into cmd + bar (line 61) and passed directly to Runtime.exec() with no sanitization, validation, or escaping applied anywhere in the path.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01360.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01360.java:46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01360.java:47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01360.java:50",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01360.java:76-95",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01360.java:61"
+      ],
+      "codeHash": "sha256:5b946ff04a38efd3a0dc7e37bb5af5fb67ab968888172f8a55c71310a97adf0b",
+      "model": "deepseek-v4-flash",
+      "decidedAt": "2026-07-21T12:05:30Z",
+      "tokensUsed": 26598
+    },
+    "0169acdf540716fafcffa45144f8a9ccf0049f3dccdbd26ffeae1ec7b4f5ce7e4fe65422e9ea850b76f3fd91839dc4e741b5462b126acfe30c20b5defe760dca_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.command-injection-process-builder",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00015.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled input arrives from the HTTP header 'BenchmarkTest00015' (line 45-48), is URL-decoded (line 52), then directly concatenated into a shell command string 'echo ' + param (line 64), and passed to ProcessBuilder.command(argList) (line 68) which is started (line 71). There is no sanitization, escaping, or validation anywhere between source and sink. Since the command uses shell -c (cmd.exe /c echo ... or sh -c echo ...), an attacker can inject arbitrary shell commands via characters like ;, |, or \u0026\u0026 in the header value.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00015.java:45-48",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00015.java:52",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00015.java:64",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00015.java:66-68",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00015.java:71"
+      ],
+      "codeHash": "sha256:11f93df7aae81727b00b9a816a1533c53783b7c7ae94e7641a6513b09454ca1f",
+      "model": "deepseek-v4-flash",
+      "decidedAt": "2026-07-21T12:05:28Z",
+      "tokensUsed": 14821
+    },
+    "02a2a6d87745e0016c32cd90198527ea64e80995c5b69b3ef4a523bb47d8cbff86c7c155110798f3e2d2589133496b95721b77826006187cdf3baa7d63738ed0_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.command-injection-process-builder",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00396.java",
+      "verdict": "benign",
+      "reason": "The user-controlled param (line 43) is assigned to bar only in the else branch (line 51), but the if-condition (line 50) always evaluates to true because (7*42)-86 = 208 \u003e 200. Therefore bar is always the constant literal \"This_should_always_happen\", and param never reaches the ProcessBuilder.command() call on line 67.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00396.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00396.java:49-51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00396.java:63",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00396.java:67"
+      ],
+      "codeHash": "sha256:41aca29c45b4a8fc8fee7c493af0e18215f9a1d1dc63bd7f570f8a39ce301732",
+      "model": "deepseek-v4-flash",
+      "decidedAt": "2026-07-21T12:05:26Z",
+      "tokensUsed": 7241
+    },
+    "02a8ee15b4d6d773ea1c5eec275d1291b387c5dab93986fe4eff40438bb30e6899b3e39bf4069df093c8a5ce8a49265dad2d2b8ce75f18223730c5f6424c594b_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02058.java",
+      "verdict": "benign",
+      "reason": "The user-controlled 'param' is added to a list in doSomething() (line 86) but bar is assigned valuesList.get(1) (line 91) after remove(0) (line 89). After removal, index 1 holds the hardcoded literal 'moresafe', not the user input. So bar always equals 'moresafe'. The sink at line 65 therefore receives only the constant string 'echo moresafe', with no attacker-controlled data reaching ProcessBuilder.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02058.java:82",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02058.java:84-91",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02058.java:65"
+      ],
+      "codeHash": "sha256:8929213b0cdba41709f00b7e7624e33a2be8b03b51f3e83aa4f463231c4e18b2",
+      "model": "deepseek-v4-flash",
+      "decidedAt": "2026-07-21T12:05:43Z",
+      "tokensUsed": 13026
+    },
+    "032b3130107b13dbd1ff42f644267e6641b3c7ae14f79f5bc0203860fed7beb2162bc0df02bb975dd432d0fcc77cf0da6137ea282d0a1fbc62e3386bb1464060_0": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00216.java",
+      "verdict": "uncertain",
+      "reason": "token budget exhausted (45207 of 60000 tokens used; the next call would exceed the budget)",
+      "evidence": null,
+      "codeHash": "sha256:dc7db7caee855b98642c819f8e74938228312e6188046502ee6ee7723c8822cf",
+      "model": "deepseek-v4-flash",
+      "decidedAt": "2026-07-21T12:06:10Z",
+      "tokensUsed": 45207
+    },
+    "037cf807d945e5bc09c196ff0f1024e8f93b6d68cbcec5b2cee4863c0b41056b2f19172888d550d650c8dd1309be8a1f08990c5a202ddd8dc3b9031550e3fb1c_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02151.java",
+      "verdict": "exploitable",
+      "reason": "User-controlled input from request.getParameter() (line 43) flows through doSomething() (lines 81-97) which returns the same value unchanged, into args on line 63 where it is concatenated into the shell command string 'ls ' + bar for non-Windows, then directly into Runtime.exec() on line 71. Because the args array contains 'sh', '-c', and the concatenated string including user input, the shell will interpret metacharacters in bar, enabling arbitrary command injection. No sanitization, whitelist, or escaping exists anywhere in the path.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02151.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02151.java:46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02151.java:63",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02151.java:71",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02151.java:81-97",
+        "src/main/java/org/owasp/benchmark/helpers/Utils.java:175-186"
+      ],
+      "codeHash": "sha256:7c987513b0363367e41c1fd3be7d5b634590280a66b073071164bbdd64c66338",
+      "model": "deepseek-v4-flash",
+      "decidedAt": "2026-07-21T12:06:02Z",
+      "tokensUsed": 28207
+    },
+    "04a22b57ed1c0fffb082b04b8a93d4a89cb644bf70ac123046e9eca18ec24373c6abce437d662e6530fa8dd1c0aac2cd0aaf4ae5dddd95c2c69e608ee6a8cfd8_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.command-injection-process-builder",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01852.java",
+      "verdict": "exploitable",
+      "reason": "The cookie value (attacker-controlled) is read at line 60, flows through doSomething() unchanged (line 100), is concatenated into a shell command string at line 78, and passed to ProcessBuilder at line 80 which invokes a shell (cmd.exe /c or sh -c) on line 83. No sanitization, escaping, or validation is applied anywhere on the path, enabling arbitrary OS command injection.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01852.java:54-64",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01852.java:66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01852.java:78",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01852.java:80",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01852.java:83",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01852.java:92-103"
+      ],
+      "codeHash": "sha256:e4480d1a115b6a1c62b542b9d9f32f7a3d523d82319bb8f3151fe8f1e1ed1ab7",
+      "model": "deepseek-v4-flash",
+      "decidedAt": "2026-07-21T12:06:02Z",
+      "tokensUsed": 15443
+    },
+    "04b13d3456d497a11f73d99eb0d606dc3119f2a630b723e620f51b267adcd4d21039e07e7d00d4861d0a6f0c47ce037530292a58e699e5864d18573719f40f11_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01685.java",
+      "verdict": "exploitable",
+      "reason": "The query string parameter 'BenchmarkTest01685' is extracted (lines 43-68), URL-decoded, and flows through 'Test.doSomething' (line 70/114) which unconditionally assigns it to 'bar'. On non-Windows (line 87), bar is concatenated into 'ls ' + bar and passed to sh -c, allowing command injection via shell metacharacters (;, |, etc.). On Windows (line 82), bar is a separate argument to cmd.exe /c echo, but cmd.exe interprets shell metacharacters like \u0026 or | in the argument, also enabling injection. No sanitization, whitelist, or escaping is applied anywhere in the path.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01685.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01685.java:56-68",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01685.java:70",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01685.java:82",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01685.java:87",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01685.java:95",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01685.java:107-118"
+      ],
+      "codeHash": "sha256:ffcf7b3c5d85c65e6f3d2e15b1c92b5d0c74e2e0469ec7005db5bebbda7faf47",
+      "model": "deepseek-v4-flash",
+      "decidedAt": "2026-07-21T12:06:48Z",
+      "tokensUsed": 40044
+    },
+    "05437e6e57f5e09edef94e9e84f7d3871d7985a2dbfbab7b2483576c71851d35c994887800e8b5c5fbb2bd0283ed9158b80a4244bb8ffd6849b8556abea0bcc0_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00051.java",
+      "verdict": "benign",
+      "reason": "The taint chain is broken at line 46: scr.getTheValue() always returns the hardcoded literal \"bar\" (SeparateClassRequest.java:52-54), not any attacker-controlled value from the request. Consequently, param is always \"bar\", the args array becomes a fixed command (\"echo bar\"), and no user input reaches the ProcessBuilder sink at line 60.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00051.java:44-46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00051.java:58-60",
+        "src/main/java/org/owasp/benchmark/helpers/SeparateClassRequest.java:52-54"
+      ],
+      "codeHash": "sha256:489ca88f1fa3479dd01d7aec43fca500b09cdffe39d8af9f9cea3d7fbd486fb9",
+      "model": "deepseek-v4-flash",
+      "decidedAt": "2026-07-21T12:06:23Z",
+      "tokensUsed": 28628
+    }
+  }
+}
