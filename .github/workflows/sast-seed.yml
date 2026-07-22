@@ -41,20 +41,8 @@ jobs:
           opengrep scan -f /tmp/rules/java \
             --sarif --dataflow-traces --output findings.sarif
 
-      - name: "opengrep findings"
-        run: |
-          results='[.runs[] | .results // [] | .[]]'
-          total=$(jq "$results | length" findings.sarif)
-          {
-            echo "## opengrep findings"
-            echo
-            echo "- **Total findings:** $total"
-            echo
-            echo "### By severity"
-            echo '```'
-            jq -r "$results | group_by(.level // \"warning\")[] | \"\(.[0].level // \"warning\"): \(length)\"" findings.sarif
-            echo '```'
-          } | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Sample 100 findings
+        run: python3 .github/scripts/sample_sarif.py findings.sarif 100 > sample.sarif
 
       - name: Triage
         uses: alexpermiakov/sast-triage@v1
@@ -63,8 +51,8 @@ jobs:
           model: deepseek-v4-flash
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           base-url: https://api.deepseek.com
-          max-findings-budget: 10
-          sarif: findings.sarif
+          max-findings-budget: 100
+          sarif-file: sample.sarif
           scope: full
           mode: baseline
           cache-write: pr
