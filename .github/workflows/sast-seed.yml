@@ -28,6 +28,9 @@ concurrency:
 jobs:
   seed:
     runs-on: ubuntu-latest
+    env:
+      SAMPLE_SIZE: 10
+      MODEL: deepseek-v4-pro
     steps:
       - name: "Check out Git repository"
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
@@ -41,30 +44,39 @@ jobs:
           opengrep scan -f /tmp/rules/java \
             --sarif --dataflow-traces --output findings.sarif
 
-      - name: Sample 100 findings
-        run: python3 .github/scripts/sample_benchmark.py findings.sarif expectedresults-1.2.csv 100
+      - name: "Sample findings"
+        run: python3 .github/scripts/sample_benchmark.py findings.sarif expectedresults-1.2.csv "$SAMPLE_SIZE"
 
       - name: Triage
         uses: alexpermiakov/sast-triage@v1
         with:
           provider: openai
-          model: deepseek-v4-pro
+          model: ${{ env.MODEL }}
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           base-url: https://api.deepseek.com
-          max-findings-budget: 100
+          max-findings-budget: ${{ env.SAMPLE_SIZE }}
           sarif-file: sample.sarif
           scope: full
           mode: baseline
           cache-write: pr
 
+      # score_triage.py writes to scorecard.md so it doesn't clobber the
+      # action's own triage-report.md; combined-report.md is the two joined.
       - name: Report
         run: |
           python3 .github/scripts/score_triage.py triaged.sarif sample.csv \
-            --model deepseek-v4-pro > triage-report.md
+            --model "$MODEL" > scorecard.md
+          {
+            cat scorecard.md
+            if [ -f triage-report.md ]; then
+              printf '\n---\n\n<sub>Below: report from `alexpermiakov/sast-triage@v1`.</sub>\n\n'
+              cat triage-report.md
+            fi
+          } > combined-report.md
 
       - name: "Publish triage report to run summary"
         if: always()
-        run: '[ -f triage-report.md ] && cat triage-report.md >> "$GITHUB_STEP_SUMMARY" || true'
+        run: '[ -f combined-report.md ] && cat combined-report.md >> "$GITHUB_STEP_SUMMARY" || true'
 
       # Agent input + output, downloadable from the run's Artifacts section.
       - name: "Upload triage artifacts (agent input + output)"
@@ -76,6 +88,8 @@ jobs:
             findings.sarif
             triaged.sarif
             triage-report.md
+            scorecard.md
+            combined-report.md
             triage-cache.json
           retention-days: 7
           if-no-files-found: warn
@@ -96,9 +110,9 @@ jobs:
           git commit -m "chore(triage): verdict cache update $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
           git push -f origin "$BRANCH"
           if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq length)" != "0" ]; then
-            gh pr edit "$BRANCH" --body-file triage-report.md
+            gh pr edit "$BRANCH" --body-file combined-report.md
           elif ! gh pr create --head "$BRANCH" --base "${{ github.ref_name }}" \
-                 --title "SAST triage: verdict cache update" --body-file triage-report.md; then
+                 --title "SAST triage: verdict cache update" --body-file combined-report.md; then
             echo "::error::Enable Settings → Actions → General → 'Allow GitHub Actions to create and approve pull requests'."
             exit 1
           fi
