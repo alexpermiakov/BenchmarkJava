@@ -59,7 +59,9 @@ jobs:
           link-base: https://github.com/${{ github.repository }}/blob/${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Report
-        run: python3 score_triage.py triaged.sarif sample.csv --model deepseek-v4-pro > report.md
+        run: |
+          python3 .github/scripts/score_triage.py triaged.sarif sample.csv \
+            --model deepseek-v4-pro > triage-report.md
 
       - name: "Publish triage report to run summary"
         if: always()
