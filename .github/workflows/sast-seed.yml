@@ -42,13 +42,13 @@ jobs:
             --sarif --dataflow-traces --output findings.sarif
 
       - name: Sample 100 findings
-        run: python3 .github/scripts/sample_sarif.py findings.sarif 100 > sample.sarif
+        run: python3 .github/scripts/sample_benchmark.py findings.sarif expectedresults-1.2.csv 100
 
       - name: Triage
         uses: alexpermiakov/sast-triage@v1
         with:
           provider: openai
-          model: deepseek-v4-flash
+          model: deepseek-v4-pro
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           base-url: https://api.deepseek.com
           max-findings-budget: 100
@@ -57,6 +57,9 @@ jobs:
           mode: baseline
           cache-write: pr
           link-base: https://github.com/${{ github.repository }}/blob/${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Report
+        run: python3 score_triage.py triaged.sarif sample.csv --model deepseek-v4-pro > report.md
 
       - name: "Publish triage report to run summary"
         if: always()
