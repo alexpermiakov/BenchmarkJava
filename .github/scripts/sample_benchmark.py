@@ -8,10 +8,11 @@ rows for just those test cases), which are what sast-triage and score_triage.py
 consume.
 
 Only findings that map to a BenchmarkTest with a ground-truth row are eligible —
-anything else can't be scored, so sampling it wastes budget. Strata = ruleId.
-Each rule keeps its share of the total, rounded, minimum 1 for any rule that
-appears. Same seed + same input = same sample every run, so results are
-comparable across runs.
+anything else can't be scored, so sampling it wastes budget. Candidates are
+collapsed to one finding per test case first, so n findings == n test cases.
+Strata = ruleId. Each rule keeps its share of the candidates, rounded, minimum 1
+for any rule that appears. Same seed + same input = same sample every run, so
+results are comparable across runs.
 """
 import json
 import random
@@ -57,19 +58,30 @@ def main(sarif_path, csv_path, n):
     run = doc["runs"][0]
     all_results = run["results"]
 
-    eligible = [r for r in all_results if testcase_of(r) in truth]
-    total = len(eligible)
-    if total == 0:
+    rng = random.Random(SEED)
+
+    by_test = defaultdict(list)
+    for r in all_results:
+        tc = testcase_of(r)
+        if tc in truth:
+            by_test[tc].append(r)
+    if not by_test:
         sys.exit(
             f"no findings in {sarif_path} map to a test case in {csv_path} — "
             "check that the scan ran against the BenchmarkJava sources"
         )
 
+    # One finding per test case. Several rules can fire on the same test case,
+    # and the scorecard reports per test case — so without this, duplicates
+    # spend two of the n slots on one row and n findings < n test cases.
+    scoreable = sum(len(g) for g in by_test.values())
+    eligible = [rng.choice(by_test[tc]) for tc in sorted(by_test)]
+    total = len(eligible)
+
     by_rule = defaultdict(list)
     for r in eligible:
         by_rule[r.get("ruleId", "<none>")].append(r)
 
-    rng = random.Random(SEED)
     picked = []
     for rule in sorted(by_rule):
         group = by_rule[rule]
@@ -80,6 +92,11 @@ def main(sarif_path, csv_path, n):
     # trim/pad to exactly n, deterministically
     rng.shuffle(picked)
     picked = picked[:n]
+    if len(picked) < n:
+        chosen = {id(r) for r in picked}
+        rest = [r for r in eligible if id(r) not in chosen]
+        rng.shuffle(rest)
+        picked.extend(rest[: n - len(picked)])
 
     run["results"] = picked
     with open("sample.sarif", "w") as f:
@@ -92,11 +109,13 @@ def main(sarif_path, csv_path, n):
             f.write(truth[t] + "\n")
 
     print(
-        f"sampled {len(picked)} of {total} scoreable findings "
-        f"({len(all_results)} total) across {len(by_rule)} rules, "
-        f"{len(tests)} test cases",
+        f"sampled {len(picked)} findings over {len(tests)} test cases "
+        f"from {total} candidates ({scoreable} scoreable findings, "
+        f"{len(all_results)} total) across {len(by_rule)} rules",
         file=sys.stderr,
     )
+    if len(tests) != len(picked):
+        sys.exit(f"expected {len(picked)} distinct test cases, got {len(tests)}")
 
 
 if __name__ == "__main__":

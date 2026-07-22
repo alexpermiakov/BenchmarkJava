@@ -56,7 +56,6 @@ jobs:
           scope: full
           mode: baseline
           cache-write: pr
-          link-base: https://github.com/${{ github.repository }}/blob/${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Report
         run: |
