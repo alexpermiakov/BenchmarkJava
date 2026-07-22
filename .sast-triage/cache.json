@@ -1,0 +1,1642 @@
+{
+  "version": 1,
+  "entries": {
+    "01ee7215f22a2116d18628e53fb4306db0d37261a8a1761286c4c68462a69f875f724cda474b3cc676ecdf3a55cb027b3937ac83a46e1bc0f5dd4913e0341b33_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-xpath-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01013.java",
+      "verdict": "benign",
+      "reason": "The user-controlled cookie value reaches param (line 60) and is passed to Test.doSomething() (line 66). But inside doSomething() (lines 114-116), the ternary condition (7*18)+106 \u003e 200 is always true, so bar is always assigned the hardcoded constant \"This_should_always_happen\" — never the tainted param. The XPath expression at line 82 is therefore constructed entirely from a constant, and no attacker-controlled data reaches the XPath compile/evaluate sink at lines 85-86.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01013.java:54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01013.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01013.java:66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01013.java:114-116",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01013.java:82",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01013.java:85-86"
+      ],
+      "codeHash": "sha256:78846d5c8fea336f600e96c9e98084c164015cd48159ae3fa2770da6e64a80e7",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:10:57Z",
+      "tokensUsed": 5901
+    },
+    "0b026a627194a453e904a46ff34d9ee8b71e31e288e754718bc07b5d86d443b050a4ddf38ebc24a03929a9e4e4d0371e54fcee99ead0199b7af0481522223ac1_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.des-is-deprecated",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01829.java",
+      "verdict": "exploitable",
+      "reason": "The flagged code at line 76 generates a DES key via KeyGenerator.getInstance(\"DES\") and immediately uses it at line 77 to initialize a cipher in ENCRYPT_MODE. The cipher then encrypts attacker-controlled input at line 94: `bar` originates from a cookie value (line 56-60) from the HTTP request, passed through `doSomething()` (lines 130-156) which performs only string transformations with no cryptographic sanitization. The code is reachable via HTTP POST to the servlet endpoint `/crypto-02/BenchmarkTest01829` (line 27, line 50). DES is a deprecated algorithm with inadequate encryption strength, and no compensating controls exist.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01829.java:27",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01829.java:50",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01829.java:56-64",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01829.java:66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01829.java:76-77",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01829.java:80-94",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01829.java:130-156"
+      ],
+      "codeHash": "sha256:b7fa81aec78e5f660a77040332fc9794a992b02f0a7293d4fd988a5aebb206d7",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:11:19Z",
+      "tokensUsed": 11389
+    },
+    "10736c44dac91306884b2a21113d8ce5e58de728f44f09ae4b749c546e00158e44b45bd6b2f230fdece59bfcd8bd70f9e0d0d34af2f33ad3134454e81d5481f0_0": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01906.java",
+      "verdict": "uncertain",
+      "reason": "token budget exhausted (168559 of 60000 tokens used; the next call would exceed the budget)",
+      "evidence": null,
+      "codeHash": "sha256:7d732f721342b518c785603e3f5098e0ea96c91121b19e3f7fd524a464bda442",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:08:08Z",
+      "tokensUsed": 168559
+    },
+    "10cb49d2cca9f914754aedee920dea5545b449354d141be2bff4b383e519d7c01161814c29cb4ecd97a3bcdf82e775d8b6a5b8c8e7946b5660621b0221eeae33_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.weak-random",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01059.java",
+      "verdict": "exploitable",
+      "reason": "java.util.Random().nextDouble() generates a 'remember me' authentication cookie value (rememberMeKey). This token is stored as a cookie and session attribute and used on subsequent requests to authenticate the user (line 71). Because java.util.Random is a linear congruential generator with only 48 bits of state, its output is predictable — an attacker who observes one or a few tokens can forge valid remember-me cookies. No cryptographic strengthening is applied; Double.toString().substring(2) is purely cosmetic.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01059.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01059.java:54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01059.java:71",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01059.java:81-89"
+      ],
+      "codeHash": "sha256:aecf675d270ffcbbab4a48db4c62afefc98a4a338199e4e7cd4af7e28e53fef6",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:11:14Z",
+      "tokensUsed": 4715
+    },
+    "1b81d0ec4d49ad9111a331eedd1d4301a57919151880b4726bc08f6992b712359979c03b7b93572850b38ec909f096e8a48d59e38ec7320d468e5eef60543f54_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01467.java",
+      "verdict": "benign",
+      "reason": "The tainted value from request.getParameterNames() flows into bar at line 97 via map34856.get(\"keyB-34856\"), but is immediately overwritten on line 98 by bar = map34856.get(\"keyA-34856\"), which retrieves the hardcoded safe string \"a_Value\" (set on line 94). The safe value is returned from doSomething() and used in the SQL concatenation at line 62. No attacker-controlled data reaches the SQL sink.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01467.java:94",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01467.java:97-98",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01467.java:62",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01467.java:100"
+      ],
+      "codeHash": "sha256:b51122b0403381855aa38ab10dd00017f724f7989f58d6d6887475b42b1c545a",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:11:23Z",
+      "tokensUsed": 5990
+    },
+    "21598c13ee31e1a63d7fa9366c56676a28261c7901e7709ec8e1a4d7ea1881a3c6a51d6063ac6f5e4a29396a33c71f414fec97fa33e48ea9e9ce73b364e936de_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00004.java",
+      "verdict": "benign",
+      "reason": "User input (cookie value) flows to response.getWriter().println(), but immediately before the sink, the value is passed through Utils.encodeForHTML(param) (line 73), which delegates to ESAPI.encoder().encodeForHTML(value) (line 367). ESAPI's encodeForHTML performs HTML entity encoding of characters such as \u003c, \u003e, \u0026, \", and ', which neutralizes XSS vectors. Although the output bypasses a template engine, explicit HTML encoding is applied, making the output safe.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00004.java:55-64",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00004.java:70-74",
+        "src/main/java/org/owasp/benchmark/helpers/Utils.java:347-368"
+      ],
+      "codeHash": "sha256:3e7d2fd25add9c9bc729ba0f58e27ece5be00d2f4d21b1efe402394b98589624",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:11:39Z",
+      "tokensUsed": 23179
+    },
+    "254cb9cc95b93059b6ed9a42da39cfcd74ebb2fbabf1b0e3d2da3975d455f2c0dd28bfcab40d1b77b5001370f03a4b6c53bd29489e71c85b46161e28dbbd114d_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02358.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP parameter name flows unsanitized into a SQL query string via string concatenation. The doSomething method always returns param unchanged (switchTarget is hardcoded 'C', which falls to bar=param). No parameterization or sanitization is applied at any hop from source to sink.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02358.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02358.java:47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02358.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02358.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02358.java:62",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02358.java:87-112",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02358.java:65-66"
+      ],
+      "codeHash": "sha256:2cae12a10c75eda9c7fe52bd9de5b0a7f882fd6da07facb413d3e5ef0004edb0",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:11:42Z",
+      "tokensUsed": 9928
+    },
+    "2654cb43eee4591b6e26908902509309771c96616ac437d258c764f6b990f4de0fdee596a8f9cc190980108ae2ed6f607be5f96e0f5152a82ca0f8018caa77f8_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02324.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP parameter name flows through doSomething() which only replaces the last character with 'Z' (ineffective XSS sanitization), then into response.getWriter().printf() in an HTML response. An attacker can easily bypass the single-character replacement by appending a dummy trailing character (e.g., payload ending in 'X' becomes 'Z' after the harmless character). No HTML encoding, escaping, or validation is applied at any point in the chain.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02324.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02324.java:47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02324.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02324.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02324.java:64",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02324.java:67-77"
+      ],
+      "codeHash": "sha256:063c59aa2447cdcee8f4d7050bbf2d2e4a0b40ece9d9de736032e4ce3c75e83a",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:11:51Z",
+      "tokensUsed": 9500
+    },
+    "2852d08de3966867e51e9f8edbc8d1276fe2b46d3c903272ab54483d0b7c9d75585859e347fc43a57cdbf665a28c0dbe0455671e1393c17f305736f08209e3dd_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01392.java",
+      "verdict": "benign",
+      "reason": "User-controlled 'param' from the HTTP request never reaches the SQL sink. In the inner class Test.doSomething() at line 76, the ternary condition '(7 * 18) + num \u003e 200' always evaluates to true (126 + 106 = 232 \u003e 200), so 'bar' is unconditionally assigned the hardcoded string literal 'This_should_always_happen' instead of the tainted 'param'. The resulting SQL string concatenates only this constant, making the sink unreachable by attacker-controlled input.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01392.java:43-47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01392.java:50",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01392.java:52",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01392.java:57",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01392.java:74-76"
+      ],
+      "codeHash": "sha256:8f6963b6242d2fb0a8a4cdf2d6a34efe7c3fafc4b25c74e7a499e52df8b3cb8d",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:12:04Z",
+      "tokensUsed": 8506
+    },
+    "29196129d774cb60256c470d0b93f53763ef0476e713d4a955d921737dd6e0012b55263b21149ed0ab9a329529d1858107b6c514b3c1f5807eb697c564805d97_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01457.java",
+      "verdict": "uncertain",
+      "reason": "token budget exhausted (168779 of 60000 tokens used; the next call would exceed the budget)",
+      "evidence": null,
+      "codeHash": "sha256:6cb25f9037e75bdc32fc39d7e6d63899c3f1c876a44535c43318ef1dd36a1312",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:12:10Z",
+      "tokensUsed": 168779
+    },
+    "2ae84b27268f5ba2160817d775c25c0009ded0f69e9d79ea09a8caf712cf5c23abd7d5035213391f875e55546ca9602496a88aead5395985b5f17b1937fcd3e2_0": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02301.java",
+      "verdict": "benign",
+      "reason": "The user-controlled 'param' value (a request parameter name) is passed into doSomething(), where it is added to a list at index 1 but never used. doSomething() builds ['safe', param, 'moresafe'], removes index 0 leaving [param, 'moresafe'], then returns valuesList.get(1) which is always the hardcoded string 'moresafe'. If param is null, it returns 'alsosafe'. The tainted value is never the return value, so bar at the sink (new java.io.File(bar)) is always a hardcoded safe constant.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02301.java:82-94",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02301.java:60-62"
+      ],
+      "codeHash": "sha256:fc3ed4cd2cbda2b349b2ac230f4238fd306c8679dc8bcbd0848910f52103fb88",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:07:57Z",
+      "tokensUsed": 8821
+    },
+    "2c285ec7b22e3dfce00888b82f672b0608b7f04e7b99d13d5d12a8b473a3a9334326e73de61d70eb3c2564f7fa3b1095ca4f271d09c7a9f15ab09c88d4b8474b_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02597.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled data from request.getQueryString() (line 43) is extracted, URL-decoded (line 68), passed through doSomething() which only replaces the last character with 'Z' — no HTML escaping or sanitization — and then written directly to the HTTP response via response.getWriter().println(bar) (line 73). The response content type is text/html (line 41) and XSS browser protection is explicitly disabled (line 72). An attacker can trivially craft a payload ending in 'Z' so that doSomething is a no-op, e.g., ?BenchmarkTest02597=\u003cimg src=x onerror=alert(1)\u003eZ, achieving stored/reflected XSS.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02597.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02597.java:56-68",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02597.java:70",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02597.java:76-86",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02597.java:73",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02597.java:41",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02597.java:72"
+      ],
+      "codeHash": "sha256:0066071c36cb50f2848fcf8acbcf2c7150dc0a9990e24a1e31153e19d909ddf4",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:12:09Z",
+      "tokensUsed": 10072
+    },
+    "2fd5288db6de82e4fe4f9d49f0e9078ab41e34e98df676a745b8f34e91516a2eecf78096bf704e78b5dc9860caff8404b79a0c6ffeaba87f4c191c1deb674e9b_0": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00061.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled cookie value flows through a no-op Base64 encode/decode round-trip into the parent argument of new java.io.File(bar, \"/Test.txt\"). No sanitization is applied: path traversal sequences like '../' survive the Base64 round-trip unchanged. The resulting File is used at line 85 (fileTarget.exists()), confirming reachability.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00061.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00061.java:67-73",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00061.java:75",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00061.java:85"
+      ],
+      "codeHash": "sha256:c62716c8d9cc5ca6c5ae165168a9e90b592f33a1fd1be047ea27c2d07c8c510c",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:08:54Z",
+      "tokensUsed": 21766
+    },
+    "31569f4f72d084ea0e3000aeaeaeef141f925268ac4a1dee325fc4a3c51c17f39397596d32aa21bce3dc3dea98172f659c699823b995df92566a604a4f5f9bb3_0": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00953.java",
+      "verdict": "uncertain",
+      "reason": "token budget exhausted (170215 of 60000 tokens used; the next call would exceed the budget)",
+      "evidence": null,
+      "codeHash": "sha256:950a24f3a516b3e2232c3108dab5e64953619567b6c5fe664fc0871268981f0a",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:08:15Z",
+      "tokensUsed": 170215
+    },
+    "31eaaf266c58fa3d23ed3c58736a5a40abbdbb41d88e7bd1dcfe3bf63b8d048fb14d6b7a29b9625ccef7546ccf2eaad4fdca40e32e667dc792e44b886baf3077_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01795.java",
+      "verdict": "benign",
+      "reason": "The taint trace breaks at the first propagator: SeparateClassRequest.getTheValue() at SeparateClassRequest.java:52-54 ignores its parameter and returns the hardcoded constant \"bar\". The param variable at BenchmarkTest01795.java:45 is always \"bar\" regardless of HTTP request input. The bar variable at line 47 therefore holds the constant \"bar\" (the inner class Test.doSomething at lines 70-86 passes it through without adding user input). The argsEnv array at line 53 is {\"bar\"} — no attacker-controlled data reaches r.exec() at line 58.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/helpers/SeparateClassRequest.java:52-54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01795.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01795.java:47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01795.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01795.java:70-86"
+      ],
+      "codeHash": "sha256:a8937cdc977b8fd5f38e182c28cff354c10daa3d8cfddd1ae023bc544e020453",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:08:37Z",
+      "tokensUsed": 45908
+    },
+    "3325aa521354518d575e69cedf0e1c9875efb8dd5f98e64ca4cb7c09846498ee9944780ebddbfb202e417e5e1ebd8b468943eebc0ef8d82a1a4ea593e5cb5e40_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.weak-random",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01502.java",
+      "verdict": "exploitable",
+      "reason": "Math.random() on line 50 generates a rememberMeKey used as a cookie value (line 80) for user authentication (validated at line 68). This is a security-sensitive token. Math.random() is not cryptographically strong; an attacker who predicts its output can forge the remember-me cookie and impersonate a user. No sanitization or SecureRandom replacement is applied.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01502.java:50",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01502.java:51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01502.java:79-86",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01502.java:68"
+      ],
+      "codeHash": "sha256:2f82ad033aaa979a64065a4ae6448fc59773c45697060d851e3c9130995b3ed6",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:12:04Z",
+      "tokensUsed": 4732
+    },
+    "34fe19197932a592a9dbd328272f3f6d7e10e30d73f5887bfb6e18f8e082ce348c2436b90059ed77d74a322d6c627ccf58878fbc6ea671863c585ebecd2fbbd4_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00554.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP parameter names from request.getParameterNames() are written directly to the HTML response via response.getWriter().println() with no sanitization or HTML escaping. The code iterates parameter names (line 45-47), selects one whose value equals 'BenchmarkTest00554' (line 52-53), stores its name in 'param', unconditionally assigns it to 'bar' (line 64, 500/42+196=207\u003e200 always true), and writes 'bar' to the response (line 68). Content-Type is text/html (line 41) and X-XSS-Protection is explicitly disabled (line 67). An attacker can trigger reflected XSS with a request like ?\u003cscript\u003ealert(1)\u003c/script\u003e=BenchmarkTest00554.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00554.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00554.java:47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00554.java:52-53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00554.java:64",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00554.java:68"
+      ],
+      "codeHash": "sha256:4606f7732520eda7e2d6f9094838ee4f6582274bfbc427e17f6ceaa3bc493a2d",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:12:21Z",
+      "tokensUsed": 11278
+    },
+    "3833333e558666462710aa675e5aa2b1d3fe1601c10f73df0723af5dc52de9a842f945310e026af2fcfba079039a47bebbf899098b702b9a91e492ee79ed3ba0_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02240.java",
+      "verdict": "benign",
+      "reason": "The doSomething method always returns the hardcoded string \"bob\" regardless of input. The switch target is guess.charAt(1) where guess is hardcoded \"ABC\", so switchTarget is always 'B'. Case 'B' sets bar = \"bob\". The branches that would propagate param (cases 'A', 'C', 'D') are unreachable dead code. User-controlled input never reaches response.getWriter().write().",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02240.java:60-61",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02240.java:68-70",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02240.java:50",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02240.java:53"
+      ],
+      "codeHash": "sha256:32ac7456642ba7be3274135148826427cb2a3d693329c2a8ec8d621f0fa37184",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:12:19Z",
+      "tokensUsed": 4945
+    },
+    "3931f0ea2e6b441e00f9d8b2d2f26073a093c3d370aa427cb8f5816ae029d5d2d6cfeb4036dba069ede4b8f74d324a84632e18dc65f45ebf05b0188f8f0f89ee_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00203.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP header 'BenchmarkTest00203' flows through URL decoding (no SQL sanitization) and a ternary that always passes param through unchanged (7*42-106=188, 188\u003e200 is false, so bar=param), then is concatenated directly into an INSERT SQL string and executed via Statement.executeUpdate() with no parameterization, escaping, or input validation.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00203.java:44-45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00203.java:49",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00203.java:54-56",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00203.java:58",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00203.java:61-63"
+      ],
+      "codeHash": "sha256:9a8f26e668852c9d2790fd7a464295f19a382688a3b998038628922652d8bf6d",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:12:22Z",
+      "tokensUsed": 4983
+    },
+    "393e3c3dd1830439b27a26cc1ab84f906bffbbb14c661e524a1bf532907044757e65b2c148709a4f470f969825dc9c7694316750be899f130385ccd25584bdc2_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02316.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP parameter name flows unsanitized into response.getWriter().format() as the format string. The path: request.getParameterNames() (line 45) → parameter name assigned to param when its value equals 'BenchmarkTest02316' (line 53) → doSomething() passes through Thing2.doSomething() which performs no sanitization (new StringBuilder(i).toString() at Thing2.java:25) → bar used as format string in response.getWriter().format(bar, obj) (line 64). Content-Type is text/html (line 41) and X-XSS-Protection is explicitly disabled (line 62). No HTML escaping or input validation occurs anywhere in the chain.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02316.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02316.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02316.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02316.java:64",
+        "src/main/java/org/owasp/benchmark/helpers/Thing2.java:23-26",
+        "src/main/java/org/owasp/benchmark/helpers/ThingFactory.java:26-51",
+        "src/main/resources/thing.properties:1"
+      ],
+      "codeHash": "sha256:6131052fa610a77695dedf2bbb01ad396d905428e1354ddf9291fd51657567da",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:12:44Z",
+      "tokensUsed": 30937
+    },
+    "3b3ea796eb94a7f87e10d923cb74cccc93201b1e999f6ecb86ac6d0b5efed49dc4c63fde8331e4ce0adcd4a3c24e6b2b4358a04fc7eb1d16ebac90eef1588ccd_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02613.java",
+      "verdict": "uncertain",
+      "reason": "token budget exhausted (53327 of 60000 tokens used; the next call would exceed the budget)",
+      "evidence": null,
+      "codeHash": "sha256:8c55e555897a29efa32687f62f8b4006e3c7c366980d8dd11d540234b302a675",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:08:49Z",
+      "tokensUsed": 53327
+    },
+    "3c09e0e8ceba64eac9e3fc07956473bc246cc8cf04943ffd4e3276def9b26f7dad15386bb54919f65293c560539015267c2981f5d875421693241895b2b093bf_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01181.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP Referer header (line 44) flows through URL decoding (line 51) and a Base64 encode-then-decode round-trip that is a perfect no-op (lines 66-70), reaching response.getWriter().write() (line 56) with no HTML escaping. The response content type is text/html (line 41) and XSS browser protection is explicitly disabled (line 55). An attacker can inject arbitrary HTML/JavaScript via the Referer header.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01181.java:44",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01181.java:47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01181.java:51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01181.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01181.java:65-71",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01181.java:56",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01181.java:41",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01181.java:55"
+      ],
+      "codeHash": "sha256:b8d7aff102a74ce32426669fd615c779918c8894e3506daf1c9c01ca62d570fe",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:12:46Z",
+      "tokensUsed": 13891
+    },
+    "43cd96810eb2ed210b047947ad8af61803ad777f3088814c59def62a7d09408a0fea8c2815ce4308ff579b0b0ed55d5c9c84105323d55f87a2f9602fca7af519_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00728.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP parameter 'BenchmarkTest00728' flows from request.getParameterValues() into param, then through a tautological if-condition to bar, and is written directly to the response via response.getWriter().println(bar). The response content type is text/html, X-XSS-Protection is explicitly disabled, and there is zero sanitization, encoding, or validation anywhere in the path.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00728.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00728.java:45-46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00728.java:52",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00728.java:56"
+      ],
+      "codeHash": "sha256:07673bb96e80b13ff75918728cc95b5999d1605af6031561158d381f195cdc13",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:12:32Z",
+      "tokensUsed": 4433
+    },
+    "43f5fe92fa542b41cf14d4e1e9870a66ded91e2ab92e867d8405d80dc1bdec9412c86624d8ea007fbb8d96108446a73a0ffad8ee6270582cd9658428813b4eb7_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01385.java",
+      "verdict": "benign",
+      "reason": "The scanner's taint trace claims attacker-controlled 'param' flows into 'bar' and then into the SQL string, but this path is unreachable. In the inner class Test.doSomething(), switchTarget is hardcoded to 'B' (guess='ABC', charAt(1)='B'), so the switch always takes case 'B' setting bar='bob'. The cases that would assign param to bar ('A','C','D') are dead code. Thus 'bar' is always the hardcoded string 'bob', and the SQL at line 52 concatenates a safe constant into the password field. No attacker-controlled input reaches the SQL sink.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01385.java:75-76",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01385.java:83-85",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01385.java:52",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01385.java:57-58"
+      ],
+      "codeHash": "sha256:b7e98b1d736303a26c2c73950e4827977b60bed786fc5805639bb6b088aa25c7",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:12:44Z",
+      "tokensUsed": 9771
+    },
+    "4a15e6e2c2bfdf0cd5620568ac74238980bfd59a78098462828582f5effd9fe712a5ddda1df546cad9eb50bfc220c9d3ea3ecae17d3de37bfb324277f2ea585d_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.command-injection-process-builder",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00158.java",
+      "verdict": "benign",
+      "reason": "Attacker-controlled input from request header 'BenchmarkTest00158' is read into `param` (line 45) and URL-decoded (line 49), but it never reaches the ProcessBuilder sink. The conditional at line 55 — `if ((7 * 42) - num \u003e 200)` where `num = 86` — evaluates to `(294 - 86) \u003e 200` → `208 \u003e 200` → always `true`. Thus `bar` is always assigned the hardcoded constant `\"This_should_always_happen\"` (line 55), and the `else` branch assigning `param` to `bar` (line 56) is dead code. The command built at line 68 — `\"echo \" + bar` — uses only the constant. The tainted `param` variable is never referenced again after line 56.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00158.java:44-46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00158.java:54-56",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00158.java:68",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00158.java:70"
+      ],
+      "codeHash": "sha256:56ecc557c6e169f42a4408531ec7b84ebba54b7c7b4fc0c53d79509390a460ca",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:08:31Z",
+      "tokensUsed": 7186
+    },
+    "4cd87e5815196e02ef4d1e17e6ab68936a7406763c4e613fd2014088ef064b8da27fdbea91c0ecb72da57954fe1d8753b78c8eb11fef6f7e399fccecca1a0299_0": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01159.java",
+      "verdict": "benign",
+      "reason": "The scanner's taint trace incorrectly claims that 'bar' (line 53, returned from doSomething) carries taint from 'param'. In the doSomething method (lines 87-114), the tainted 'param' flows through lines 91-107 into variable 'f54259', but 'f54259' is never used in the return value. Instead, line 110 assigns a hardcoded static string to 'g54259', and line 111 derives 'bar' from that hardcoded string via thing.doSomething(g54259). The tainted data path is a dead end; 'bar' is not attacker-controlled. Thus the FileInputStream at line 60 receives a safe, non-attacker-controlled filename.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01159.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01159.java:87-114",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01159.java:91-107",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01159.java:110-111",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01159.java:59-60"
+      ],
+      "codeHash": "sha256:eef0ff564d00ed31b75c46c449a3afa14eaa66811800cd1f375297a8ef1c058b",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:08:58Z",
+      "tokensUsed": 19559
+    },
+    "4e2655344f133dfd3cbd37b334cb85b10cc924f1ec301524f5167496c107b4a0f5e2b2138af0490b67b55ee79f8072d8f2d649108504e871d771711f0b68d2f2_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.weak-random",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01910.java",
+      "verdict": "exploitable",
+      "reason": "Math.random() on line 53 is used to generate a 'rememberMeKey' (line 54), which is then set as a cookie value (line 83) and stored as a session attribute (line 89) to implement a 'remember me' authentication mechanism. Math.random() is not cryptographically strong; its output is predictable, allowing an attacker to forge the remember-me cookie and impersonate users. No SecureRandom or other cryptographic RNG is used anywhere in this file.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01910.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01910.java:54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01910.java:82-89"
+      ],
+      "codeHash": "sha256:9bc6cf401531a8fdb16928ccbaa30074293d8943a177aa7b963f93e98c443faf",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:13:07Z",
+      "tokensUsed": 8160
+    },
+    "51a134225de9a881e1703eab813177e38550f7c7d0d3f2c2609e6931efbda3e64c7da784d3bfd855539e2ea4bb762388f1a13c48a9b04271d4d0652e7ba10660_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01316.java",
+      "verdict": "benign",
+      "reason": "The 'result' variable written to the response at line 65 is not attacker-controlled. It comes from javax.xml.xpath.XPath.evaluate(), which returns the string-value of XML nodes from the static employees.xml file — a trusted resource containing only benign employee data (names, emails, ages). The attacker can influence which XML node is selected via XPath injection (line 62: bar inserted into expression), but cannot inject arbitrary content into the evaluate() return value. The raw user input (param/bar) never appears in the HTTP response on the non-exception path. The error path (lines 70-73) properly HTML-encodes bar via ESAPI before output. No XSS is possible.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01316.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01316.java:46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01316.java:62-63",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01316.java:65",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01316.java:81-91",
+        "src/main/resources/employees.xml:1-27"
+      ],
+      "codeHash": "sha256:d518a1b5900ba30dfb7e628dc9954644cdb2c353fe3003ce8119dab236a33a44",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:14:37Z",
+      "tokensUsed": 38741
+    },
+    "52696abe7bfbd2909d800488805c52b0df82160745193fe88a4fa3280e599ebaa63c8a97b5584ddada8cf5fc932d1894c4edb938ffa9010d6840930713121199_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.des-is-deprecated",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01148.java",
+      "verdict": "exploitable",
+      "reason": "The code at line 69 hardcodes KeyGenerator.getInstance(\"DES\") and at line 67 uses Cipher.getInstance(\"DES/CBC/PKCS5Padding\"). DES is genuinely instantiated and used to encrypt data. The cipher selection is unconditional — no code path substitutes a secure algorithm. While the inner class Test.doSomething (line 168-170) always returns the constant \"This_should_always_happen\" due to the tautological if-condition ((7*42)-86 \u003e 200), the DES cipher is still actively created, initialized, and applied via c.doFinal(). The rule correctly flags the deprecated algorithm usage.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01148.java:67",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01148.java:69",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01148.java:89"
+      ],
+      "codeHash": "sha256:64ed618b70c6b21f1e34fe3571675302adf53b7dd25ca36c2f03629bb2cb74b0",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:13:24Z",
+      "tokensUsed": 14896
+    },
+    "541cbc99644de82d65c567f3d609e5cc08c88a8e26d2c2abf527a922f8d1b624954eeac3cf6551db67f291da86e23eae0b06bf5e6e3b97d0684d985c3ab3d0ee_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.weak-random",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00080.java",
+      "verdict": "exploitable",
+      "reason": "java.util.Random().nextFloat() on line 68 generates a weak, predictable random value. The result is converted to a string key rememberMeKey (line 69), which is then set as a cookie value (line 97) and stored in the session (line 103) as a 'remember me' authentication token. On subsequent requests (lines 85-87), the cookie value is compared against the session attribute to authenticate returning users. java.util.Random is not cryptographically strong — it uses a 48-bit seed derived from system time, and nextFloat() yields at most ~2^24 distinct values (23-bit mantissa), making the token trivially brute-forceable. An attacker who predicts or enumerates rememberMeKey can forge the cookie and impersonate any user. No additional hardening, salting, or cryptographic derivation is applied to the random value.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00080.java:68-69",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00080.java:85-87",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00080.java:96-103"
+      ],
+      "codeHash": "sha256:2a2dd74921c2c06dd17ab8e890d2aa38b213b712ec07d1b5beb0a057914e5114",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:13:15Z",
+      "tokensUsed": 9549
+    },
+    "5ddf462c9dd033e95a4c0fe5ab088cf4ea32ef9d88c55ed29e983a8cdd95bd287a18f729222437b9cdbfecba52eba79d9e830b20755a9239f47a3a29142b4817_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.use-of-md5",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01038.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled input from request.getHeader(\"BenchmarkTest01038\") flows through URL-decoding (line 49) and a no-op Base64 round-trip (lines 110-114) into MessageDigest.getInstance(\"MD5\") (line 54) and md.update(input) (line 69) without any sanitization. The MD5 algorithm is actually invoked on attacker data — the defect is real and reachable.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01038.java:44-45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01038.java:49",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01038.java:51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01038.java:54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01038.java:57",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01038.java:69",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01038.java:110-114"
+      ],
+      "codeHash": "sha256:1087a9211ea5dbc4c18e12801746ece8644ae895dc1c4e7ca1c1efd7fb8bb1c2",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:13:37Z",
+      "tokensUsed": 11372
+    },
+    "5eae04f60d3df0e2a5731cbf89fbb911e7b790350af44937bb81823dd6fd928ba9b745a833d90d1370110ae32cdb698d77f58272dcf987b723778181410ae58c_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01460.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP parameter name flows unsanitized into connection.prepareCall(). The code extracts a parameter name (not value) from request.getParameterNames() when any value equals 'BenchmarkTest01460' (line 53), passes it through a no-op HashMap store/retrieve in Test.doSomething (lines 89-91), concatenates it into a SQL {call ...} string (line 62), and executes it via prepareCall (lines 67-71). No parameterization, escaping, or validation is applied.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01460.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01460.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01460.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01460.java:62",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01460.java:67-71",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01460.java:89-91"
+      ],
+      "codeHash": "sha256:eb93d528343f0ad966ff53f2ff09104a1a04da9c156587035b16562ca30f2ef9",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:13:45Z",
+      "tokensUsed": 10177
+    },
+    "60b23789319cb1f419bf6088ad90d2a3c0c6786613e563a39fdeda5b7f219665517c3dea655436b9293decc225376e461bd497c66bdea021ab0719c7239f0147_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.cookie-missing-secure-flag",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00300.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled input from HTTP request header 'BenchmarkTest00300' (line 44) flows through URL-decoding (line 51) and a Base64 no-op (lines 57-59) into a Cookie value (line 77). The cookie is explicitly set with setSecure(false) (line 79), disabling the secure flag, and is added to the response (line 83). No sanitization or guard prevents this path.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00300.java:44-48",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00300.java:51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00300.java:57-59",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00300.java:65",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00300.java:77",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00300.java:79",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00300.java:83"
+      ],
+      "codeHash": "sha256:d63979ac8c7339289be309b58b61bc77015fee90b5847a9dd8ea88b7852b4392",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:14:04Z",
+      "tokensUsed": 10724
+    },
+    "6259a94741c74a130b8f13338b90d7d4121cde42e94e5d6dc7430eb84d99211c551cee835ff1d86678dbc6e7fca65ec9da4c4a703494086b4c2be2aa3556a2ff_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00772.java",
+      "verdict": "benign",
+      "reason": "The switch statement at lines 53-67 always takes the 'B' branch because switchTarget is always 'B' (derived from hardcoded 'ABC'.charAt(1) on line 50). This assigns the hardcoded constant 'bob' to bar. The param variable holding attacker input is only assigned to bar in the unreachable 'A', 'C', 'D' cases. Since bar is always 'bob', the SQL query on line 69 concatenates a constant and no attacker-controlled data reaches the sink.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00772.java:49-50",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00772.java:53-67",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00772.java:69",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00772.java:74"
+      ],
+      "codeHash": "sha256:f25b4fffe66aecaf9ebe36f5987fb9041822ad5ee7e6bf94f07a2bce97861ef2",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:13:52Z",
+      "tokensUsed": 4944
+    },
+    "6badb9b3ca1c97044190ed1d432c442ac4b1936b3d5f5917a91900d92b89b95e8f4555b0994c332d9466a440d2d08d2964a625122b005430ca544605bc279a35_0": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01025.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP header 'BenchmarkTest01025' flows through URL decoding (line 49) and a pass-through method call (Thing2.doSomething, which returns input unchanged) directly into the File constructor (lines 53-54) as the child path component. No sanitization, validation, or path normalization is applied at any step. An attacker can inject '../' sequences to escape the TESTFILES_DIR base directory.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01025.java:44-45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01025.java:49",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01025.java:51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01025.java:53-54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01025.java:73-81",
+        "src/main/java/org/owasp/benchmark/helpers/ThingFactory.java:26-36",
+        "src/main/java/org/owasp/benchmark/helpers/Thing2.java:23-26"
+      ],
+      "codeHash": "sha256:3b750e5cf0d174aee3d2f93e2f2b0981a04f84438e0214fc14bae50d30db7e06",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:09:28Z",
+      "tokensUsed": 192254
+    },
+    "6f8d93229a1af2f7d726b279b03d446e67be8fef13498235de82a816f32d488e3448bf7f0801bcfd6a5214f35a4345438d3271de6bebda2ea57085ef77b78b15_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.jdbc-sqli",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01969.java",
+      "verdict": "benign",
+      "reason": "The attacker-controlled header value 'param' is passed to doSomething(), where a ternary expression always evaluates to true: (7*18) + 106 = 232 \u003e 200. This causes bar to always be assigned the hardcoded constant \"This_should_always_happen\", never the attacker-controlled param. The SQL string uses bar, so user input never reaches the SQL statement.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01969.java:44-46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01969.java:51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01969.java:73-77",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01969.java:53"
+      ],
+      "codeHash": "sha256:f243abbebd4d2b87da7f9165a03d49c9e130f4e317e993f2dac0c9ee7eb2e551",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:13:56Z",
+      "tokensUsed": 3988
+    },
+    "72ab6500e015a4b980fd4c0545954630b8d41f4d128ec2c51099d48b978b1c07c1cf6ab5a7b4b62eef2df249da35b318910310ec3ec32a6e6a63dfe8f0e33404_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.des-is-deprecated",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01480.java",
+      "verdict": "exploitable",
+      "reason": "The code unconditionally generates a DES key via KeyGenerator.getInstance(\"DES\") and uses DES/CBC/PKCS5PADDING cipher to encrypt attacker-controlled input (HTTP request parameter). No code path avoids or replaces the weak DES algorithm; the cipher choice is hardcoded and unremediated. This is a genuine use of a deprecated, cryptographically weak cipher.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01480.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01480.java:48",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01480.java:62-63",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01480.java:66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01480.java:73-74",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01480.java:86"
+      ],
+      "codeHash": "sha256:694f63ef77b71b0c5fe6dadb92f9b8b4dd5773b5ccff7dcb9e60ee08ab2c789e",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:14:22Z",
+      "tokensUsed": 5513
+    },
+    "75028a006f97e7fab22320dedfb99e59de9fab2dc7fd69ffb933568d2381c388ac8d597ed71bd1119adccc554df1faa12f8d0594dae8ffadec2fdaa617500057_0": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00359.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP parameter 'BenchmarkTest00359' flows unsanitized from request.getParameter (line 43) through param → bar (always assigned at line 50 due to unconditionally true branch: (500/42)+196 = 207 \u003e 200) directly into new java.io.File(bar) (line 53). The only encoding applied is ESAPI.encodeForHTML on line 57-62, which is output encoding for HTML rendering — it does not prevent path traversal sequences like '../'. No path sanitization (FilenameUtils, canonicalization, input validation) exists anywhere in the file.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00359.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00359.java:50",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00359.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00359.java:63"
+      ],
+      "codeHash": "sha256:3f64ea769fafd338268dc20b9420076d792e4f995ef80230d60680e8efbc41cf",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:09:07Z",
+      "tokensUsed": 7744
+    },
+    "760456103784a3370aea06a217743855c383486fd115cf57812b4e528825d140e4841745ad30aa213ec01d05ab34a69cd88913120a9a01ca21ca0c494382ce5a_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01894.java",
+      "verdict": "benign",
+      "reason": "The user-controlled cookie value (bar) is injected into an XPath expression at line 82, but the value written to the response at line 85 is result — the output of xp.evaluate() against a static XML file (employees.xml from classpath, line 71-72). The attacker can manipulate which XML nodes are selected (XPath injection) but cannot cause arbitrary attacker-controlled content to appear in the HTTP response. The attacker's raw input is never reflected: bar goes into the XPath predicate, not into result's content. In the error path (lines 89-93), bar is HTML-encoded via ESAPI.encoder().encodeForHTML() before being written, so that path is also safe. No path exists where attacker-controlled strings reach the response unsanitized.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01894.java:54-63",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01894.java:66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01894.java:82-85",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01894.java:89-93",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01894.java:99-107"
+      ],
+      "codeHash": "sha256:aeed982585fc804e4b6d068b22c1d28b63c6dc08dac8287ffbdf447c012fa9c1",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:15:20Z",
+      "tokensUsed": 14727
+    },
+    "7812350e815f35089fe2010df0c86c7540c699c80eac19d154ef523a754098b29adbf6fc2bed7d8d05417c7b452582c1601b6c3ff552dd1913448287000e9792_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.jdbc-sqli",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02092.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP header 'BenchmarkTest02092' flows through no sanitization into a plain java.sql.Statement.execute() call. The flow: request.getHeaders() at line 44 retrieves attacker data → line 47 extracts first header value → line 51 URL-decodes (not SQL sanitization) → doSomething() at lines 69-85 is a no-op that returns param unchanged → line 55 concatenates bar directly into SQL string → line 60 executes via java.sql.Statement (not PreparedStatement). No escaping, parameterization, or validation of the SQL-sensitive input occurs anywhere in this path.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02092.java:44-47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02092.java:51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02092.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02092.java:69-85",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02092.java:55",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02092.java:58-60"
+      ],
+      "codeHash": "sha256:cb31f44473a239755c0d3e7f27bac8ea556f7c27f2d504c5277c7f3d7ad84c20",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:14:39Z",
+      "tokensUsed": 166994
+    },
+    "789cab60b95553e5252a81ee6b32b8c90073e8f21289a09e163202838589c275f7e8f70711b074a65b2d389b623399a7256ace60d7e2d92868598954af729360_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.desede-is-deprecated",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02193.java",
+      "verdict": "benign",
+      "reason": "The rule targets Triple DES (DESede/3DES), but the flagged line uses single DES ('DES'), which is a substring-match false positive for the DESede pattern. Additionally, the data encrypted is hardcoded: doSomething() always sets bar to 'bob' (line 170) because switchTarget is always 'B' (line 162, 'ABC'.charAt(1)), so no attacker-controlled request parameter ever reaches the cipher.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02193.java:66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02193.java:160-170"
+      ],
+      "codeHash": "sha256:bde6f9592ed7218ddb2af1945f439f4139b56411e32295b10861db529e8b61d4",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:14:59Z",
+      "tokensUsed": 11831
+    },
+    "7d099cf64ae4498b20992c7ad5e8f349bbdc2294b0698b0a0012b4f6440dc6996ac40889308303d04e94a9b640d35a3505deb316920f6e98d0fd0c896de948a5_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.desede-is-deprecated",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00946.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled cookie value (line 60) flows through a trivial no-op transform (lines 132-141) into a deprecated DES key (line 76) and a DESede-defaulting cipher (line 72-73), then is encrypted (line 94) with no AES fallback or effective sanitization. Weak crypto is actively applied to untrusted input.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00946.java:54-60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00946.java:66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00946.java:72-73",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00946.java:76-77",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00946.java:81-94",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00946.java:132-141"
+      ],
+      "codeHash": "sha256:e4139b010e405dd00e1ef35fceab564a074e0a972521edb7ebfcc427efd04961",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:15:34Z",
+      "tokensUsed": 12704
+    },
+    "8986ad973ad3d00528bbafdc98ce6f6615038e1544e4667c419f8b14a19dc2ec686118e131abc634bf53e531b0054eea9b1f34c9bc340254dd3c0547be8cb013_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02125.java",
+      "verdict": "benign",
+      "reason": "The user input from request.getParameter() at line 43 is passed through org.owasp.esapi.ESAPI.encoder().encodeForHTML() at line 55 inside the doSomething() method before being written to the response. ESAPI's encodeForHTML() properly HTML-encodes characters like \u003c, \u003e, \u0026, \", ' into their entity equivalents, which prevents reflected XSS in the HTML body context. The scanner's taint trace failed to follow the data flow into the doSomething() method body where sanitization occurs.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02125.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02125.java:46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02125.java:52-58",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02125.java:49"
+      ],
+      "codeHash": "sha256:3d6df74299f5a8e16bd52c34c85860769ecae3dbb173fcffab15e2e97ab8f422",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:15:24Z",
+      "tokensUsed": 176645
+    },
+    "8a9165d84056f4b0f356ed6d65e70e0935cdd03bcd138f22e3c3001610f5dc50ad51fa0d227d5a36010b4b44849d8cd91850b803f4ec091691b37aa63d602f0b_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-ldapi-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02116.java",
+      "verdict": "benign",
+      "reason": "The doSomething method always returns the hardcoded string \"bob\" because its switch statement is controlled by guess.charAt(1) where guess is always \"ABC\", so switchTarget is always 'B'. Cases 'A', 'C', 'D' that would propagate param to bar are unreachable dead code. Thus bar is always a constant safe value, and the LDAP filter is always \"(\u0026(objectclass=person)(uid=bob))\". The attacker-controlled param from the HTTP request never reaches the sink.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02116.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02116.java:46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02116.java:107-132",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02116.java:54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02116.java:61"
+      ],
+      "codeHash": "sha256:855f3b24680f4da1964cf77031e71ccad3808afcc5c7818855a5c60eaaf13e5c",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:15:26Z",
+      "tokensUsed": 14152
+    },
+    "8cf8375cc9536e51b80ddfdfb45ad797b533d4ff5414763b791f6b2b57a2bb505484e4b74e02aedc54bde69862c79ed340950026495b2f6a1edfa26c0db5a09a_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02237.java",
+      "verdict": "benign",
+      "reason": "User input from request.getParameterMap() is passed through org.owasp.esapi.ESAPI.encoder().encodeForHTML(param) at line 59 before being written to the response. ESAPI's encodeForHTML properly HTML-encodes characters (\u003c, \u003e, \u0026, \", ') into entity references, neutralizing XSS in the HTML body context set by the Content-Type header. The sanitized value 'bar' is then written via response.getWriter().println(bar), so the sink receives HTML-safe output.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02237.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02237.java:46-47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02237.java:50",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02237.java:59",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02237.java:53"
+      ],
+      "codeHash": "sha256:4c691cd8bf60b8d97c5be31799d4183e845d09671e638a193c7b34479f73b35b",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:15:32Z",
+      "tokensUsed": 4598
+    },
+    "8d6f6d4eed7af5207e6fb78e2f35960e5092213a97ec8f903d69705153e25385032fae8579b3e6f63c7fd022e41db4e69e61b5e6b978f6ad32a46e97ef213c16_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00395.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled request parameter flows from request.getParameter (line 43) through a trivial non-sanitizing transform (split on space, line 47) directly into response.getWriter().write (line 53) with content type text/html and no HTML escaping applied. The split(' ')[0] operation is not a security boundary — any XSS payload without spaces (e.g., \u003cscript\u003ealert(1)\u003c/script\u003e) passes through unchanged.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00395.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00395.java:46-47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00395.java:53"
+      ],
+      "codeHash": "sha256:8fb6687812663919f7b452a11fcc48a980df2de5016131a47d0caea861ea178b",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:15:37Z",
+      "tokensUsed": 4495
+    },
+    "8d9ab0ebf295d511e7d826a6086ae9c3aaf5a1c1ab4a054173a157a70585dbcb0866a19942ef3809c5af4741d80b913691a5feb50b772d861d0252070a328b74_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01893.java",
+      "verdict": "benign",
+      "reason": "The doSomething() method at lines 106-117 unconditionally returns the hardcoded constant \"This_should_always_happen\" because (7*42)-86 = 208 \u003e 200 is always true. The else branch assigning user-controlled param is dead code. The attacker-controlled cookie value never reaches the response writer. Additionally, the data written at line 92 (value.getTextContent()) originates from the static employees.xml file, not from user input.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01893.java:106-117",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01893.java:54-66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01893.java:82",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01893.java:91-92",
+        "src/main/resources/employees.xml:1-27"
+      ],
+      "codeHash": "sha256:86085bcad9876f98403de06cd01f398fb9b6bb1106c90de8348ec8bcc6077a18",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:16:09Z",
+      "tokensUsed": 37538
+    },
+    "8f7e19813b18d9daeb869d5425260b16f4199e25f33e5a4102743fe46983130b44b27d70fd7a9ce2d601b4f460da53a28873ef2aff61a38fe609c25c71811b28_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01462.java",
+      "verdict": "uncertain",
+      "reason": "model did not produce a parseable verdict after retry",
+      "evidence": null,
+      "codeHash": "sha256:1b26bb78910f218f2e4a0b2071d08d4f2fb522a046770f9e7f0673e67276edc9",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:16:20Z",
+      "tokensUsed": 29794
+    },
+    "900317c85ee5098b12b13d771221d45b07b47d361299e05d151536a3afd8221ffa4775cee31b6815340715dec7552932313f644e53126a67856d6ba5c74071c3_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-ldapi-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01492.java",
+      "verdict": "benign",
+      "reason": "The taint chain is broken in the inner class Test.doSomething() at line 115. The ternary condition '(7 * 18) + num \u003e 200' evaluates to '126 + 106 \u003e 200' i.e. '232 \u003e 200', which is always true. Consequently, 'bar' is always assigned the constant string 'This_should_always_happen', and the user-controlled 'param' can never flow into 'bar'. The LDAP filter on line 57 is therefore always the hardcoded constant '(\u0026(objectclass=person)(uid=This_should_always_happen))', making exploitation impossible.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01492.java:44-45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01492.java:48",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01492.java:110-116",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01492.java:57",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01492.java:60"
+      ],
+      "codeHash": "sha256:70463597005e5a7bd895a080346406536ce83d832d61a101216b01c68efc1310",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:15:53Z",
+      "tokensUsed": 9748
+    },
+    "909814833c0d033376ea800d1cb0c94354d35c321fbcd41812e1f3de85429e8e5740934e86fc1543cc71a260a0a4e0b94ddcb61c043a4e4666133a46bccb3338_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00340.java",
+      "verdict": "benign",
+      "reason": "The switch statement on line 58 always takes case 'B' because switchTarget is always 'B' (derived from hardcoded string \"ABC\".charAt(1) on line 55). Case 'B' sets bar to the constant \"bob\" (line 63). The tainted param variable is never assigned to bar — the assignments in cases 'A', 'C', and 'D' (lines 60, 67) are dead code. Consequently, the SQL string on line 75 contains no attacker-controlled input, and the batchUpdate sink on line 77 is safe.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00340.java:54-55",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00340.java:62-64",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00340.java:75",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00340.java:77"
+      ],
+      "codeHash": "sha256:72ea9901ede980ef8cd46fac7e05502100d9cc09c4f8e019d60872b340256407",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:15:57Z",
+      "tokensUsed": 5490
+    },
+    "90deefb392a6a847156934be954f26bcd437af1d7b01eb8fbfe6f4d524d856a0576a44bd2d1efb958f77e79e09c48124def0914f382cd6514962cdbbca7cef10_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01443.java",
+      "verdict": "benign",
+      "reason": "The ternary in Test.doSomething() at line 92 is always true: (7*18)+106=232 \u003e 200, so bar is always the string constant \"This_should_always_happen\". The tainted param is never used. The scanner's taint trace is broken by this unreachable branch. No attacker-controlled input reaches Runtime.exec().",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01443.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01443.java:47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01443.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01443.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01443.java:82-96",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01443.java:72"
+      ],
+      "codeHash": "sha256:b3f23eaf5287006f2ef3150ad668ca36e0105375e5e9b14d0535eddcda364e25",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:09:20Z",
+      "tokensUsed": 22769
+    },
+    "9723402ef1f7904c473d455c3dc4e5073d2348fa1f980616b20e18c50f88cc39f38588e0025dec98057c72d90d12cbd48fb1c986ef77c2d2fe4579e8dbc74d91_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-session-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02524.java",
+      "verdict": "exploitable",
+      "reason": "The HTTP request parameter 'BenchmarkTest02524' is read at line 43-45 into 'param'. The doSomething method (lines 60-76) performs no sanitization — it wraps param in a list, removes a dummy entry, and returns param unchanged as 'bar'. The raw attacker-controlled value is then stored directly into the session via putValue at line 51 with no validation, encoding, or sanitization. This allows an attacker to inject arbitrary data into a trusted session attribute, constituting a trust boundary violation.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02524.java:43-46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02524.java:48",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02524.java:60-76",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02524.java:51"
+      ],
+      "codeHash": "sha256:e2b991d2b681a2ac8eb534d2846fd0f3e562563e1bfb44e7c5dbd199cfff3661",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:16:05Z",
+      "tokensUsed": 4476
+    },
+    "979a88a8ccbbd2eb116ff013e86898a9cae23dce69c3f89a1e59cc2982d44498720a2fd179562bcf3aff92fdb70b2d78e18b4890cc7c22c51fbd8d467d9e0b6c_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01879.java",
+      "verdict": "benign",
+      "reason": "The tainted cookie value (param) is discarded inside doSomething(). The method builds a list ['safe', param, 'moresafe'], removes index 0 ('safe'), then retrieves index 1 which is the hardcoded string 'moresafe'. The attacker-controlled param (now at index 0 after the removal) is never accessed. The returned bar is always either 'alsosafe' (param null) or 'moresafe' (param non-null) — never the tainted input. Thus the tainted value does not reach the SQL sink.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01879.java:54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01879.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01879.java:66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01879.java:88-104",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01879.java:68",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01879.java:73-77"
+      ],
+      "codeHash": "sha256:98e4cea42e5000fb8ea55ddb269fb31ed0da3b04049dc885d9d7dc81d782acf0",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:16:19Z",
+      "tokensUsed": 9790
+    },
+    "998c6e03178bc63abe92bc75e2eae74d77974f48854587f29e88918b9e76e4226b9b4e9a3e4f921def7d3304f0445faf052f0c1f5d4a6a1721a44a158bab99dd_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02632.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled query string value flows from request.getQueryString() (line 43) → param extraction \u0026 URL-decode (lines 56-68) → doSomething() always returns param unchanged because guess.charAt(2) is 'C', hitting case 'C'/'D' (lines 92-105) → bar concatenated directly into SQL string (line 72). The PreparedStatement only parameterizes USERNAME=?; the PASSWORD clause with bar is embedded via string concatenation with no sanitization.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02632.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02632.java:56-68",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02632.java:70",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02632.java:72",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02632.java:77",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02632.java:92-106"
+      ],
+      "codeHash": "sha256:9ccfbf6e6f35100b58c67c7ec545fbc4759c81fc323c78516ed8484ec61443f3",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:16:37Z",
+      "tokensUsed": 18199
+    },
+    "9c47d3531436e13174595fbf64114fb852a6b379a261812c3a3da89b946bc1060a92273455a49b0a2cc8aff09839c6dec62ad6c2f94e69bba9258249e60b5445_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02589.java",
+      "verdict": "benign",
+      "reason": "The doSomething method at line 77-93 discards the user-controlled param and always returns a hardcoded string. After adding param to the list, remove(0) deletes the first element, and get(1) retrieves index 1 which is the constant \"moresafe\", not the user input. The tainted param never flows into bar, so the sink at line 74 receives only a fixed safe string.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02589.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02589.java:56-68",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02589.java:77-93",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02589.java:74"
+      ],
+      "codeHash": "sha256:1d0d93980c2da18d8c554f214e33552e396ec20485c768201a238698345d0548",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:16:26Z",
+      "tokensUsed": 5283
+    },
+    "9d7c8eaab4610149523fa78aff96a9004fcf3a1723b2d44173012b9700e322b84c9a70815021abff6e29ce33ce7020f4bdbfb28fd11eb150dde0f0ea573a99c7_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02172.java",
+      "verdict": "benign",
+      "reason": "The tainted HTTP parameter 'param' passes through doSomething() (line 68-79), where a ternary expression assigns bar = (7*18) + num \u003e 200 ? \"This_should_always_happen\" : param. With num=106, the condition (126+106=232 \u003e 200) is always true, so bar is always the constant string \"This_should_always_happen\". The tainted param never reaches the sql variable or the PreparedStatement sink. The SQL string is effectively constant and attacker-uncontrolled.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02172.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02172.java:46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02172.java:68-79",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02172.java:48",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02172.java:53-57"
+      ],
+      "codeHash": "sha256:44f216a5a2b6bfe8be058945e1a85d5116b2857a22f2e6d789e3e64e612f8ceb",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:16:35Z",
+      "tokensUsed": 5125
+    },
+    "9f48a2d4d2903403bf9011aac017455aefd2e05ed14a4b7d41eabfbd196777ea9241e475c69ddd15071e3077e0044acdf8d19f89c79a42d78602db465e9dc1de_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01212.java",
+      "verdict": "benign",
+      "reason": "The taint trace claims attacker-controlled 'param' flows into 'bar' via the inner class doSomething(), but the actual list manipulation code ensures it does not. In doSomething() (line 74-90), bar is initialized to 'alsosafe'. When param is not null, it is added to a list at index 1: ['safe', param, 'moresafe']. Then index 0 is removed, shifting param to index 0 and 'moresafe' to index 1. valuesList.get(1) always returns 'moresafe' — a constant string. The tainted param is never retrieved. Consequently, bar is always a safe constant, the SQL at line 55 contains no attacker data, and the PreparedStatement uses only hardcoded parameters.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01212.java:44-47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01212.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01212.java:77-86",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01212.java:55",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01212.java:60-63"
+      ],
+      "codeHash": "sha256:3c970a414e5ff739a65b08dcce85c934a4390f66001bfae9059740985f6d2511",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:16:43Z",
+      "tokensUsed": 9321
+    },
+    "a3323251264be0c0af584ec5392138f99df6ef58bbedd92d03dce8f12f41cebc513ddae904264175352ea79497055e8c2d68733a8c76f964959e7f0e0f0cab94_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.weak-random",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00960.java",
+      "verdict": "exploitable",
+      "reason": "java.lang.Math.random() at line 68 generates a random double that is converted via Double.toString and substring into a rememberMeKey (line 69). This key is used as a remember-me authentication token: it is set as a cookie value (line 98) and stored in the session (line 104), and subsequently compared against incoming cookie values to authenticate returning users (line 86). Math.random() is not cryptographically strong; the token is predictable by an attacker, enabling session hijacking. No mitigation or fallback to SecureRandom is present.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00960.java:68-69",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00960.java:85-88",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00960.java:96-104"
+      ],
+      "codeHash": "sha256:b28b041e44e10bb1a6699c82427204473f00df6cdf268e6f6829b85f4923847e",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:16:44Z",
+      "tokensUsed": 8792
+    },
+    "b17645b1752aab48ec149992b93a18f3e59c663c6cfe4f014cc8fc34786babdda4ecf88162bcd2c6701898fe663a2a8b320bd4aec5c1c1f1b5956821bb5405ea_0": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02027.java",
+      "verdict": "uncertain",
+      "reason": "token budget exhausted (168908 of 60000 tokens used; the next call would exceed the budget)",
+      "evidence": null,
+      "codeHash": "sha256:69427c145ae37a3f66f62ba5a51f7ac5531bf88b58bcc9db0c27cda14da96a3d",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:09:33Z",
+      "tokensUsed": 168908
+    },
+    "b4bb32021d7a8303572d83f835cbadecdb84c74e58a384f80e828450711ccc6c1e72a92d518922eecd74594ab38f368979945d1e20f48f6101e0e41d7a8c7f53_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02484.java",
+      "verdict": "benign",
+      "reason": "Although user input `param` enters `doSomething()` and is briefly assigned to `bar` on line 62 via `map12535.get(\"keyB-12535\")`, line 63 immediately overwrites `bar` with the hardcoded safe string `\"a_Value\"` from `map12535.get(\"keyA-12535\")`. The `bar` variable that reaches the sink on line 51 is `\"a_Value\"`, not the user-controlled input. The taint is broken at line 63.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02484.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02484.java:45-46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02484.java:48",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02484.java:57",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02484.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02484.java:62-63",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02484.java:51"
+      ],
+      "codeHash": "sha256:5661098525ba91c6b1828bd628402fedc643990b09f32620436b683ff28a1e9c",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:16:47Z",
+      "tokensUsed": 4709
+    },
+    "b948779d5fc1f580090a2cf870328cc0b36a54aab3b57f9138f7e4cff5d5ff2b21c9ac77a3c9b5dcf2427e4945201f163622207ba35c9e5a8aeadcc29383f68c_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.jdbc-sqli",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00436.java",
+      "verdict": "benign",
+      "reason": "The if-condition at line 50, (7*42) - num \u003e 200, evaluates to (294 - 86) = 208 \u003e 200, which is always true. Therefore bar is always assigned the constant literal \"This_should_always_happen\" (line 50), and the else branch assigning param to bar (line 51) is dead code. The SQL statement at line 53 is built with this hardcoded constant, so no user-controlled input ever reaches statement.execute(sql).",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00436.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00436.java:49-51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00436.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00436.java:58"
+      ],
+      "codeHash": "sha256:9fb05c07e7b7aacea31ca25a1cac846c65db517021c39b848470cd0ed2204d5e",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:16:47Z",
+      "tokensUsed": 3606
+    },
+    "b9c2b23a89d37f112f974198810e3cb3e67b472a208ed3d1f3a4709b86d72419a01676a55d29f26ee3ece9a750f0c50b0963dcb502de73ff2dd74371bbb57e78_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02188.java",
+      "verdict": "benign",
+      "reason": "The taint chain is broken inside doSomething(). The user-controlled 'param' is propagated through a16667→b16667→c16667→d16667→e16667→f16667, but f16667 is dead — it is never used to produce the return value. Instead, line 85 assigns a hardcoded string literal 'barbarians_at_the_gate' to g16667, and line 86 returns thing.doSomething(g16667). The 'bar' variable used in the SQL concatenation at line 48 is therefore derived entirely from a static string, not from the HTTP request parameter. No attacker-controlled data reaches the SQL sink.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02188.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02188.java:46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02188.java:82-88",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02188.java:48"
+      ],
+      "codeHash": "sha256:bb8f2a9713db6c4f2600dc079ed549dff51899a7a1f80891e05db42f0482df03",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:17:07Z",
+      "tokensUsed": 9927
+    },
+    "baced303df7b518ce270d97bde8c1e99aca6c9cdbc1c8fbe2631237013dccd49b255fc20c11255579827c548792b44724f7190a73d3c029588e3688fe69e6bb0_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.jdbc-sqli",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02652.java",
+      "verdict": "benign",
+      "reason": "The SQL string concatenates variable 'bar', but bar is derived from the hardcoded static string 'barbarians_at_the_gate' (line 109) passed through ThingInterface.doSomething(), not from user input. The user-controlled param flows through variables a25323–f25323 but is discarded when g25323 is assigned a static literal and used instead. Both Thing1.doSomething and Thing2.doSomething return their argument unchanged, so bar = 'barbarians_at_the_gate'. The resulting SQL is static with no attacker-controlled data.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02652.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02652.java:56-68",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02652.java:70",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02652.java:86-113",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02652.java:109-112",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02652.java:72",
+        "src/main/java/org/owasp/benchmark/helpers/Thing1.java:23-26",
+        "src/main/java/org/owasp/benchmark/helpers/Thing2.java:23-26"
+      ],
+      "codeHash": "sha256:8f44d2eb23eb6068257499fb21c96d45c06e5fb38d62c727813571a0e5300334",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:17:16Z",
+      "tokensUsed": 23438
+    },
+    "bb2a2217c59e3217fe97ebb838fb94c83fb7b824735562a47a7abd5ef73b7108724f938cbf8007dd8cc8051db1b730903cc29e9a860215957035a49b52b5e004_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.desede-is-deprecated",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01741.java",
+      "verdict": "exploitable",
+      "reason": "The code uses deprecated weak cryptography: KeyGenerator.getInstance(\"DES\") with Cipher.getInstance(\"DES/ECB/PKCS5Padding\") (from benchmark.properties). Single DES is a 56-bit key cipher considered broken and deprecated. No mitigation or sanitization exists; the algorithm choice, while hardcoded and not attacker-controlled, is itself the security defect.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01741.java:53-54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01741.java:57",
+        "src/main/resources/benchmark.properties:2",
+        "src/main/java/org/owasp/benchmark/helpers/SeparateClassRequest.java:52-53"
+      ],
+      "codeHash": "sha256:b7a205e36ab3ce68ffd759a7d1b3685197d7bbca064dd756b7a1b2f609d5cad3",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:17:46Z",
+      "tokensUsed": 12886
+    },
+    "bb8ccf275e214c6fda37d2ef4a0ae44614a0ee0b60195824f75b4c8eadf6be5730495ad73f7a5e74adb9cba18f6d95fbb91726a05baae9f6c9ceff70f1094ad0_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02127.java",
+      "verdict": "exploitable",
+      "reason": "The doGet/doPost handler reads 'BenchmarkTest02127' from the request at line 43. The doSomething method at line 59 unconditionally assigns param to bar (500/42 + 196 = 207 \u003e 200 is always true). No sanitization, encoding, or validation is applied. The raw user-controlled bar is written directly to the HTML response via response.getWriter().print(bar) at line 49, with content type text/html. This is a textbook reflected XSS.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02127.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02127.java:46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02127.java:49",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02127.java:52-63"
+      ],
+      "codeHash": "sha256:78080e8a13bcc499c0930b62d2248e24425cc4cacf0c13849e7cbb70beef83a0",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:16:59Z",
+      "tokensUsed": 4287
+    },
+    "bed86f25b84900f0f9801bd3abb68f1fd71eac87c18e9f4aa88bde3a758a1294a466772df1131509da0874a4f0cb343c23d1188490b2db6389b652c1893a9cb7_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01301.java",
+      "verdict": "benign",
+      "reason": "The tainted param flows through local variables a11416→f11416 but is never returned. At line 92, g11416 is assigned the hardcoded static string \"barbarians_at_the_gate\", and line 93 returns thing.doSomething(g11416) — which is untainted. The tainted f11416 is dead after line 89 and does not reach the SQL sink.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01301.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01301.java:46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01301.java:89",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01301.java:92-93"
+      ],
+      "codeHash": "sha256:01e9ad20a5fa067d9a907c564af65c621dd20d7574331f7ce5ff0c65caa8cc85",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:17:45Z",
+      "tokensUsed": 31801
+    },
+    "bf4c4a95f2c6d95d617b80f02a1b874169dfaf40e4247a5488fa80b15bae5d786ff4882e6b59764256ad530b54d5c1a779aefbdc02c281b50835f236f164dcca_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00594.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP parameter name flows unsanitized into a SQL string via string concatenation. The code takes request.getParameterNames() (line 45), extracts a parameter name when its value equals 'BenchmarkTest00594' (line 52-53), stores it in a HashMap (line 63), retrieves it as 'bar' (line 65), and concatenates it directly into the SQL: \"SELECT * from USERS where USERNAME=? and PASSWORD='\" + bar + \"'\" (line 67). The tainted SQL is then passed to connection.prepareStatement() (lines 72-73). The single parameterized placeholder (?) protects only USERNAME; bar is baked into the SQL string before preparation, with zero sanitization or validation at any hop.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00594.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00594.java:47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00594.java:52-53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00594.java:63",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00594.java:65",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00594.java:67",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00594.java:72-74"
+      ],
+      "codeHash": "sha256:6e0d1567045ddb94d825c4e7f77248c4bd83c9f804e6af1365b58394653336e8",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:17:37Z",
+      "tokensUsed": 14448
+    },
+    "c16e4125a546bb1f01d181c88b5428ae0195a384af7622234ba97dfcbb8f3d975f121ad1c44c2219f39cd5234c1836204357365a370c645485bce209be2eaf17_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01377.java",
+      "verdict": "uncertain",
+      "reason": "token budget exhausted (169376 of 60000 tokens used; the next call would exceed the budget)",
+      "evidence": null,
+      "codeHash": "sha256:0e02a362910444446679fca3673b339728c8804c9d35ff1fbdd869d993c90224",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:17:48Z",
+      "tokensUsed": 169376
+    },
+    "c35d3c8cb1000d1aada277aa8a9c08194e2db68bb3135100e13f0fdcbd93b36c42b65279bcb5434f98abcbc0136cc53487df7a8a79580cca1d6c1b1a9752f5c9_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.weak-random",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01602.java",
+      "verdict": "exploitable",
+      "reason": "Line 50 creates a new java.util.Random() instance and calls nextFloat() to generate a remember-me authentication token. The float is converted to a string at line 51 (trimming the leading '0.') and stored as rememberMeKey. This token is then used at line 79 as a cookie value, stored at line 85 as a session attribute, and compared at line 68 to authenticate returning users. java.util.Random uses a predictable 48-bit LCG; an attacker who observes or predicts values can forge the remember-me cookie and impersonate users. No SecureRandom replacement or other mitigation exists.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01602.java:50",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01602.java:51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01602.java:68",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01602.java:79",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01602.java:85"
+      ],
+      "codeHash": "sha256:db99e7fa85dfe391d8e678f8c0338258c85c5930c6f45519500dc6a562b70bb1",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:18:07Z",
+      "tokensUsed": 14640
+    },
+    "c3dd84c96cea83d9275f2e6c0d7b9c4ce619ca72550504bcda39518bd561887e409d47eb8af881011c376fc7e8fbc46a8179b8e2ee6570d30c445aa262411845_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02699.java",
+      "verdict": "benign",
+      "reason": "The taint trace is broken at hop 3. SeparateClassRequest.getTheValue() always returns the hardcoded constant string \"bar\" and never reads from the wrapped HttpServletRequest. Thus param='bar', bar remains 'bar' through doSomething(), and the executed command is always 'echo bar' — no attacker-controlled input reaches ProcessBuilder.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/helpers/SeparateClassRequest.java:51-54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02699.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02699.java:47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02699.java:59-64"
+      ],
+      "codeHash": "sha256:4672b6f96cb5ccb5969b88853a5c00c5f77f00ee7235c2961b75690e6fd63f49",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:09:29Z",
+      "tokensUsed": 27279
+    },
+    "c683644b768424cc661841577a5af4d56c710fa7516ff4b145c6bcf5c888436f45e7766c94aba706b0ce94a35da0e6e274fc80b8c407e7a567087fadaa57a322_0": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00219.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP header name (request.getHeaderNames) reaches FileInputStream without any sanitization. The commonHeaders filter (line 48) only excludes standard headers like 'accept'/'cookie'/'host' but does not block path traversal sequences such as '../'. The value flows directly: header name → param (line 54) → bar (line 66, ternary always selects param since 188 \u003e 200 is false) → fileName = TESTFILES_DIR + bar (line 72) → new FileInputStream(new File(fileName)) (line 73). An attacker can send a custom header like '../../etc/passwd: x' to traverse out of the testfiles directory.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00219.java:44",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00219.java:46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00219.java:48-49",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00219.java:54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00219.java:66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00219.java:72",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00219.java:73"
+      ],
+      "codeHash": "sha256:0d6f8735a715d532792b365dcf7887967065e6099d1d286e73944dabefa0cd08",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:09:56Z",
+      "tokensUsed": 34567
+    },
+    "c7547ca8c53c0b25eaa987a62b9743b06e5a0b209e723dafe1a3ea35dd6abf9136c0be778bdaa8dd2d5052c2d70ba7ed56fa5f40dd5d400ea55550ba7d5f4007_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.command-injection-process-builder",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00815.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled input from the HTTP query string flows unsanitized into a ProcessBuilder command. request.getQueryString() (line 43) is parsed to extract param (line 56-67), URL-decoded (line 68), assigned to bar (line 70), concatenated into a shell command string \"echo \" + bar (line 82), and passed to pb.command(args) (line 86). The shell wrappers cmd.exe /c or sh -c (lines 75-81) interpret the full string, so an attacker can inject arbitrary OS commands via shell metacharacters in the query parameter value.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00815.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00815.java:56-68",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00815.java:70",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00815.java:82",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00815.java:86"
+      ],
+      "codeHash": "sha256:23a4015875c411ef72e64dcf9ad71b1b82b4440345d5dc9cfd25724ad4b65bf0",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:09:39Z",
+      "tokensUsed": 4017
+    },
+    "c904ffa41d8d9d486fdff2b0e55f1afd72fdb8b456a45a4217cf815005ccad7f801a95894e65fe39b01d5d61421f98c1749daa47317b049d76383c910be8be9b_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.jdbc-sqli",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00940.java",
+      "verdict": "benign",
+      "reason": "User input `param` is added to a list and then `valuesList.remove(0)` discards the first element. After removal the list is [param, \"moresafe\"], and `valuesList.get(1)` returns the hardcoded safe string \"moresafe\" — not the tainted `param` at index 0. If `param` is null, `bar` stays at its initial safe default \"alsosafe\". In neither case does attacker-controlled input reach the SQL concatenation.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00940.java:45-56",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00940.java:59"
+      ],
+      "codeHash": "sha256:56b3c2b3c16b4cd5062cd36b2252480ef93cdb3750082b360876d587f02f2844",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:18:03Z",
+      "tokensUsed": 4243
+    },
+    "c93f4742989b8cb9fec85156b08e727692fac8de5415c942e249f8ae5013534a844a39a08aecaeb406caddf0324c113566122b4f3514cfbd398d480e36ee4ec8_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.weak-random",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00068.java",
+      "verdict": "exploitable",
+      "reason": "Math.random() on line 73 generates a 'remember me' authentication token (rememberMeKey, line 74) that is set as a cookie value (line 103) and stored as a session attribute (line 109). On subsequent requests, possession of this cookie authenticates the user (line 91). Math.random() uses a predictable 48-bit LCG unsuitable for security tokens; an attacker able to observe or predict values can forge the remember-me cookie and hijack sessions. No cryptographic strengthening is applied.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00068.java:73-74",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00068.java:91",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00068.java:102-110"
+      ],
+      "codeHash": "sha256:5779bb0a6748c403a3d1f27bf3ac9462c00222317b383a3a1085481a8a4d07cb",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:18:06Z",
+      "tokensUsed": 8773
+    },
+    "cc59e9ed6c740a13160e423df1f24a07a2081410dcf3790866c811f974179d00141d283a52a814c33f6c5d6e29bab272166111137de37b20e38ef9b9872f2969_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00385.java",
+      "verdict": "exploitable",
+      "reason": "User input from request.getParameter(\"BenchmarkTest00385\") flows through identity transformations (StringBuilder append/replace on safe suffix only, Base64 roundtrip, space-split, ThingInterface.doSomething which is an identity in both Thing1 and Thing2) and reaches response.getWriter().printf() as part of a text/html response with zero HTML escaping or sanitization.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00385.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00385.java:63",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00385.java:66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00385.java:70",
+        "src/main/java/org/owasp/benchmark/helpers/Thing1.java:23-26",
+        "src/main/java/org/owasp/benchmark/helpers/Thing2.java:23-26"
+      ],
+      "codeHash": "sha256:0511829040274c585ee6b7e9d10fae4cbf11273b90b62bf8ac34b1dfaba9b419",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:18:30Z",
+      "tokensUsed": 39135
+    },
+    "cca80b1e70e33e7fe1fa243acf3d9b946cfc5fa29f0e049234f1734de0fee03a1d6146908093a35a697fd11d8feab22e0c8dc83618721ccd87853b3ee253af93_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00311.java",
+      "verdict": "uncertain",
+      "reason": "token budget exhausted (45308 of 60000 tokens used; the next call would exceed the budget)",
+      "evidence": null,
+      "codeHash": "sha256:5b12898dac285bd07c23f638f2404245ff2247c5d831454044e468cf9bc6106e",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:10:37Z",
+      "tokensUsed": 45308
+    },
+    "d23478ce38acbb115b6bcdf7172b371acd12ed01e216dd14095aa451f7515c617bfe2012d55490cfc8b0fb1d9ad59d520f7bc6dd2d8703f0a4c1812b8600b503_0": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00135.java",
+      "verdict": "benign",
+      "reason": "The user-controlled 'param' value never reaches the sink. The switch statement at lines 56-69 always takes case 'B' (line 60-62) because switchTarget is hardcoded to 'B' (line 53: guess.charAt(1) on \"ABC\"). This assigns bar = \"bob\" (a constant). The taint propagations at lines 58 and 65 (bar = param) are unreachable dead code. The fileName constructed at line 72 is always TESTFILES_DIR + \"bob\", a safe constant path with no attacker control.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00135.java:44-46",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00135.java:52-53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00135.java:56-70",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00135.java:72",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00135.java:83-84"
+      ],
+      "codeHash": "sha256:1207c1a2394983baeb58912a96e2c44732bcac56374bbc6448158e438fa09c82",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:10:13Z",
+      "tokensUsed": 169547
+    },
+    "d3624e93c8fd4db732f402522225505d77287fd1ad2435383d4173fd20d8cdeca5939c95c61379c63bb05e80bf12f499526496664b7908af2271cbce99f6c6a9_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01875.java",
+      "verdict": "benign",
+      "reason": "The cookie value (attacker-controlled source) is HTML-encoded by ESAPI.encoder().encodeForHTML() inside doSomething() at line 81 before being returned as 'bar'. At the sink, bar is again passed through Utils.encodeForHTML() which also delegates to ESAPI.encoder().encodeForHTML() (Utils.java line 367). The value written to response.getWriter() is thus fully HTML-entity-encoded and cannot inject scripts or markup.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01875.java:54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01875.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01875.java:66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01875.java:78-84",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01875.java:71-75",
+        "src/main/java/org/owasp/benchmark/helpers/Utils.java:347-368"
+      ],
+      "codeHash": "sha256:5cc8c0d57e15fcaf2529c160b06cc05084d05503138a619a1a01dba46d6b5a8d",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:18:46Z",
+      "tokensUsed": 38096
+    },
+    "d52f1b51939858fd64ba4e9388ed12e7ff99fe2ef0a9923c3c3666cabf03ad42ac8c597280978469a1a87a7c4d780ca00caa0ef0f7f0fc5c2caaf6ac56120780_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.weak-random",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01278.java",
+      "verdict": "exploitable",
+      "reason": "The code uses `java.util.Random().nextLong()` (line 48) to generate a `rememberMeKey` (line 49) that serves as an authentication token stored in a cookie (line 78) and session attribute (line 83). This is a security-sensitive token ('remember me' authentication cookie) and `java.util.Random` is not cryptographically strong — its output is predictable, allowing an attacker to forge valid session tokens. No sanitization or `SecureRandom` replacement exists anywhere in the codebase.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01278.java:48-49",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01278.java:77-83"
+      ],
+      "codeHash": "sha256:5885599306b6a552dfd91f7b01516b7f3f0fcd8b816e2ee745246a104be40617",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:18:36Z",
+      "tokensUsed": 14034
+    },
+    "d6f5a1b24aa11e906dfef62763461f6e9e1ddc17cdbfb6ab020941d77fe1c45028850df18b7dee0bbf9ad93c3ccee283c1c19a6358e73f9257d9dfff8fd7d1ea_1": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.use-of-sha1",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00704.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP request parameter flows directly into a SHA-1 MessageDigest without any sanitization. User input from request.getParameterValues (line 43) is assigned to 'bar' (line 48), then hashed via SHA1 (line 61/59) and stored. SHA-1 is cryptographically broken (collision attacks) and the code offers no mitigating controls — a stronger hash like SHA-256 would be required.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00704.java:43-45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00704.java:48-51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00704.java:59-61",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00704.java:64-65",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00704.java:77"
+      ],
+      "codeHash": "sha256:6e011e514016175c9a61109832cff840a7a9f38f5078ccc9a51094008aa3915f",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:18:36Z",
+      "tokensUsed": 5065
+    },
+    "d88899666024d9d9bdd9a5e4b2ae9ce75846e4e465ee05127ffcd0a692f298d9801f18b22b73e8920702a0753c2efd65ee33977e41bedb1ce1da7f200e7fd1e4_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-session-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00836.java",
+      "verdict": "exploitable",
+      "reason": "The taint path is fully verified: request.getQueryString() (line 43) extracts attacker-controlled query-string data into param (lines 56-67), URL-decodes it (line 68), applies only a trivial space-split (line 71: param.split(\" \")[0]), and passes the result directly to session.setAttribute() (line 74). The split(\" \") transformation does not constitute effective sanitization — an attacker can still inject arbitrary values into the session as long as they avoid spaces. No validation, encoding, or filtering is applied to bar before it enters the trusted session store, violating the trust boundary.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00836.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00836.java:56-67",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00836.java:68",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00836.java:71",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00836.java:74"
+      ],
+      "codeHash": "sha256:7b256c22620445ec3c087df1c43a0330d35da14fea1aaf0a1f5864f240b233dd",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:19:03Z",
+      "tokensUsed": 9150
+    },
+    "d98b8daf76455af48ce1972b12aedf750d78b31035ac327f6ca7247a4e15c65ab24a1239d19600fad5a50beb442891583c12cf7889c2be52f4d08462cb6dbdaa_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.des-is-deprecated",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01483.java",
+      "verdict": "exploitable",
+      "reason": "The DES cipher is genuinely instantiated and used for encryption in a reachable HTTP servlet endpoint (doPost). Line 62 requests 'DES/CBC/PKCS5Padding' and line 64 generates a DES key. No code path avoids or replaces the deprecated DES algorithm — the weak cryptography is invoked every time the endpoint is hit. The flagged defect (use of deprecated DES) is real and reachable.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01483.java:27",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01483.java:38-41",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01483.java:62-67"
+      ],
+      "codeHash": "sha256:82a9b4400aef906a10c55194c8ea17ff19a915b2a3a7ecdd5a4980c066c14188",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:19:46Z",
+      "tokensUsed": 18980
+    },
+    "daa5e183afc6e3e54dfb5220e73e47fe96810a202e4dd13cfafda71555de614b2a55fc48df2387838692b90acd2e2d81dca7006f754e4dd8b8ba62091103c76e_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.jdbc-sqli",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00515.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP request parameter 'BenchmarkTest00515' flows unsanitized into a dynamically constructed SQL string via string concatenation, then executes directly through Statement.execute(). No prepared statement, sanitization, or validation is applied.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00515.java:43-48",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00515.java:52-59",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00515.java:62",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00515.java:67"
+      ],
+      "codeHash": "sha256:306b7672732388a799b42a4f1dfb075e7438928a7a1687b40f0d46a899fef3e3",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:18:45Z",
+      "tokensUsed": 3665
+    },
+    "db0ae5530563ded4aad9059547b4a5c6cd6cf1a2259c9a4358661893f392bd4d5add57f7e0f950b40e21dc4574b9b8cef0e2f968cc647fa58e34970b8ea9c461_0": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01115.java",
+      "verdict": "benign",
+      "reason": "The tainted param flows into doSomething() where it undergoes many transformations (lines 96-112), but none of those results are returned. Instead, line 115 assigns a hardcoded string 'barbarians_at_the_gate' to g43762, and line 116 passes that hardcoded string through thing.doSomething() (which is an identity function in both Thing1 and Thing2). The returned bar is always 'barbarians_at_the_gate' — completely independent of attacker input. The tainted data path is severed at line 115. The fileName at the sink (line 67-69) is TESTFILES_DIR + 'barbarians_at_the_gate', containing no user-controlled content.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01115.java:54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01115.java:61",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01115.java:96-112",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01115.java:115-116",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01115.java:67-69",
+        "src/main/java/org/owasp/benchmark/helpers/Thing1.java:22-27",
+        "src/main/java/org/owasp/benchmark/helpers/Thing2.java:22-27"
+      ],
+      "codeHash": "sha256:3f97606ab156b6d1a5848df018853c1c9ca05a66fb027c1517e7281c9c10d16b",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:10:29Z",
+      "tokensUsed": 37962
+    },
+    "de702a02e244db132164699cc3fe8cc4574701b82fac476560f3f999f219672ade65c637250d5a18c45ccb5c7f01d63d6d495bb6b93cc855840d0396190b26b4_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.sqli.tainted-sql-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01962.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP header value flows through a base64 encode/decode no-op into direct string concatenation in a SQL query. The bar variable is embedded in the SQL string on line 53 before prepareStatement is called, so the PreparedStatement does not parameterize it. The USERNAME=? placeholder is filled separately via setString, but the PASSWORD clause with concatenated bar remains injectable.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01962.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01962.java:51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01962.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01962.java:58-59",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01962.java:70-83"
+      ],
+      "codeHash": "sha256:522a38a7c9b42110b8933ae4cac343831adf42ac72a26c1236f68fcf76672e4b",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:19:08Z",
+      "tokensUsed": 5472
+    },
+    "dfe6db01892c3d56c71f6f820536415d0b35641b5fd2cd295d595d103ea6b87e5ae649b3043ec6fc75cd042475fbebf3a9a2e037962c12f1931ad26bc04143ce_0": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00863.java",
+      "verdict": "benign",
+      "reason": "The taint trace is broken at hop 3. The source `request` is passed to `SeparateClassRequest`, but the method called at line 45 is `getTheValue()`, which hardcodes its return value to the constant string `\"bar\"` (SeparateClassRequest.java:52-54) and never reads from the request. Thus `param` (and subsequently `bar`) is always the constant `\"bar\"`, not attacker-controlled. The `new java.io.File(bar, \"/Test.txt\")` sink therefore receives no user input — no path traversal is possible.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/helpers/SeparateClassRequest.java:52-54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00863.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00863.java:49",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00863.java:51"
+      ],
+      "codeHash": "sha256:55f774681a08f57596dd31e11b325103f28d360d8fe892b11dc17bacbc9491b8",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:10:26Z",
+      "tokensUsed": 44877
+    },
+    "e0387ae1a0d46f325387c5614248dca904904386c82a4c088395f36db1d831baf98ec398fbcbecc1ad7c65f9baecfafba393ca86684ee17c7ae92a24d3cf2fa3_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.weak-random",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00653.java",
+      "verdict": "exploitable",
+      "reason": "java.util.Random().nextInt() at line 55 generates a value directly used as a 'remember me' authentication cookie (lines 56, 83-84, 89). The cookie value serves as an authentication token checked at lines 67-78. java.util.Random is not cryptographically secure — its LCG output is predictable, allowing an attacker to forge the remember-me cookie and bypass authentication. No additional entropy, hashing, or SecureRandom is applied.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00653.java:55-56",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00653.java:83-90",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00653.java:67-78"
+      ],
+      "codeHash": "sha256:5e76023e2a974ec8a34ed148e186f845598ff81d6fdce238ba076a7090970070",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:19:21Z",
+      "tokensUsed": 12126
+    },
+    "e118ba74458e66fa6b8b2ea1c3984531be425b8005c53ad41eb4f9b72c6902bc444b73a41b7f3d203fc58ce20729e2ae8d12b9d505c64b9a8401d562b8547d3c_1": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.use-of-sha1",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01844.java",
+      "verdict": "benign",
+      "reason": "The SHA1 hash is computed on a hardcoded string 'barbarians_at_the_gate' (line 154), not on user input. User input from the cookie flows through doSomething() (lines 135-151) but the transformed result (f37183) is discarded; line 154 overrides the flow with a hardcoded literal before passing it to thing.doSomething(). Both Thing1 and Thing2 return their input unchanged, so bar is always the hardcoded string. The SHA1 at lines 74/76 hashes only this hardcoded, non-attacker-controlled data, making the weak-hash finding unexploitable.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01844.java:54-63",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01844.java:131-158",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01844.java:74-80",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01844.java:92",
+        "src/main/java/org/owasp/benchmark/helpers/Thing1.java:23-26",
+        "src/main/java/org/owasp/benchmark/helpers/Thing2.java:23-26"
+      ],
+      "codeHash": "sha256:f249052d4598e99d54afafc5dff6f785e3d58baadd8114c5035efc521c345802",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:19:52Z",
+      "tokensUsed": 34878
+    },
+    "e32e1305f6f7363b6e57cfc5a94444d8e57909119f8b70580ab08c09933d32430e0a8358898dc5718ec967a947ffd117eb24183116e7c5781cf252d65f2ab475_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.weak-random",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01356.java",
+      "verdict": "exploitable",
+      "reason": "Line 52 uses java.util.Random().nextFloat() to generate a value that becomes a 'remember me' authentication token. The float is converted to a string key (line 53), then set as both a cookie value (line 81) and a session attribute (line 87). On subsequent requests, the cookie value is compared against the session attribute to identify the user (line 70). java.util.Random is not cryptographically strong; its output is predictable, allowing an attacker to forge the remember-me cookie and impersonate users. No SecureRandom or other mitigation is applied.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01356.java:52",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01356.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01356.java:70",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01356.java:80-88"
+      ],
+      "codeHash": "sha256:b9ed92de5547a8eb6285e58d871994f12ff14d8b6edef7d95dfd0937cf18ee6c",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:19:32Z",
+      "tokensUsed": 8917
+    },
+    "e3d11bd83412a943741ddd1b9d11c7e5468eab9218203e698a5ea9be7c80eeaee9f2976d46f285bd7a6f558812cea4875ef6945ca5a7187df4dc9b940be86207_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.cookie-missing-secure-flag",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00169.java",
+      "verdict": "exploitable",
+      "reason": "The cookie value originates from attacker-controlled input (request.getHeader on line 45), flows through URL decoding and a String cast into variable str (line 66), and is used as the cookie value on line 78. The cookie's secure flag is explicitly set to false on line 80 via cookie.setSecure(false), meaning the cookie will be transmitted over unencrypted HTTP. No sanitization or override corrects this. The 'bar' variable computed in lines 51-60 is a dead store and never used.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00169.java:44-45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00169.java:65-66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00169.java:78",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00169.java:80",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00169.java:84"
+      ],
+      "codeHash": "sha256:8aa7d6fa5fb9f3409ffff5183f6221188be885aad844ae6354c8ce243148c2cd",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:19:51Z",
+      "tokensUsed": 8981
+    },
+    "e60dc1e0b6547dd816a5e60272a052e5c74123889a1d523a6366553bfb39fc5fc86e91c1d7e3b0eb337c8aa975198f570df284428a51c287c4c1d827ae826e60_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.weak-random",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02421.java",
+      "verdict": "exploitable",
+      "reason": "java.util.Random().nextGaussian() at line 50 generates a non-cryptographically-secure value. The derived string rememberMeKey (line 51) is used as a remember-me cookie value (line 79) and stored as the session-authentication attribute (line 84). On subsequent requests (lines 62-73), the cookie value is compared against the session attribute to authenticate the user — making it a security token. A predictable Random output allows an attacker to forge the cookie and bypass authentication. No additional entropy or cryptographic strengthening is applied.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02421.java:50",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02421.java:51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02421.java:78-84",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02421.java:62-73"
+      ],
+      "codeHash": "sha256:9c1dd8b925b773be6e6838e12f69e68bbef6c8425626ed9d63ed1ad95539e56f",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:19:58Z",
+      "tokensUsed": 9313
+    },
+    "e94a38015ae1f3632af41bbe5721609365ae69902405ecf57b8053eeaf955c2a354275b935d67551965244130e73e0f9d234af838dd33cc35f8e2874f1587f36_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01363.java",
+      "verdict": "uncertain",
+      "reason": "token budget exhausted (48893 of 60000 tokens used; the next call would exceed the budget)",
+      "evidence": null,
+      "codeHash": "sha256:fc63e145cf95d04c97eb1ed9225bdaaa05245425cf02aa5d6f29461b51e43acb",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:11:41Z",
+      "tokensUsed": 48893
+    },
+    "ec62ecb8f60bedd7f294c134d093e6137b92b86441b21516e45f50205eee6e50c304e51e1e7acbc1af63ff8786aa9a405f1af99b9783e69a75205a42e11c3e58_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02340.java",
+      "verdict": "benign",
+      "reason": "The attacker-controlled input (parameter name from request.getParameterNames()) is assigned to 'param', then passed to doSomething(). However, doSomething() always returns the hardcoded string \"bob\" regardless of the input: switchTarget is always 'B' (from guess.charAt(1) where guess=\"ABC\"), which hits case 'B' setting bar=\"bob\". Thus the tainted 'param' value never reaches the bar variable that flows into the Runtime.exec() call on line 85.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02340.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02340.java:47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02340.java:53",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02340.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02340.java:99-108",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02340.java:72-77",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02340.java:85"
+      ],
+      "codeHash": "sha256:11a7633325b3f66442a1443b7f6ccdef641db3a39753bdcd32a20ada36cb97b4",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:10:41Z",
+      "tokensUsed": 5584
+    },
+    "ed1f5fd54c5dbec59f114908b21c648c547f18fe423404f20884b466af144774116fee16aabc1c9a13686687c5bdcdbc0419f9dbfc9e9b34086807c785c3fad8_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01610.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled input flows from HttpServletRequest.getParameterValues() at line 43, through a no-op Base64 encode-decode round-trip in the inner class Test.doSomething() (lines 77-82, encode then immediately decode returns the original string), into Runtime.exec() at line 61 without any sanitization. An attacker can inject arbitrary OS commands via the 'BenchmarkTest01610' request parameter.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01610.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01610.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01610.java:48",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01610.java:77-82",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01610.java:60-61"
+      ],
+      "codeHash": "sha256:6f57dac50e8a618c406d5272063439df95c6dbd11a9fe683f8b52e03f5e45c41",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:10:50Z",
+      "tokensUsed": 15107
+    },
+    "ede04b4666aa91d025e35bb61f0d85d8808446f6f8c4eb8bcbcacb9de4755fe131accf0a7dbb9d22d70370453430b43fe75eecb7c176ced46764fefed952f1d3_1": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.use-of-sha1",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02671.java",
+      "verdict": "benign",
+      "reason": "The string hashed with SHA1 is always the hardcoded constant \"bar\". The param variable is obtained via SeparateClassRequest.getTheValue(), which ignores the HttpServletRequest entirely and returns a fixed literal (line 53: return \"bar\"). The doSomething helper (lines 112-123) passes param through a HashMap without modification. Since no attacker-controlled input reaches MessageDigest.update() on line 73, the weak SHA1 hash operates only on a constant known at compile time — making the finding unexploitable.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/helpers/SeparateClassRequest.java:52-54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02671.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02671.java:47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02671.java:57",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02671.java:60-61",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02671.java:73"
+      ],
+      "codeHash": "sha256:a473046fca67ec51a4f07b004d5057caaf54cf450c55eed89661b0b08e2a328c",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:20:32Z",
+      "tokensUsed": 10624
+    },
+    "efb171696262b43695d1743ece8a57a8fba882787be116da8df5e95e60f29ba4a6c40ba53cf505b350b2759f73df80e3485c8d888f6af3ed781c79274a743f64_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-cmd-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00982.java",
+      "verdict": "benign",
+      "reason": "The tainted cookie value (param, line 60) flows into Test.doSomething() where it is stored in a HashMap and retrieved on line 97, but is immediately overwritten on line 98 by a hardcoded safe constant 'a_Value' retrieved from the same map under a different key. The returned 'bar' is always the constant 'a_Value', never the attacker-controlled cookie value. This constant is what populates argsEnv on line 72 and reaches Runtime.exec() on line 77. No attacker-controlled data reaches the sink.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00982.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00982.java:66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00982.java:95",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00982.java:97-98",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00982.java:72",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00982.java:77"
+      ],
+      "codeHash": "sha256:1b302647e021ac18e711df5b2f282f6745d323f6778d9ff2f28845cb592c4605",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:11:02Z",
+      "tokensUsed": 10066
+    },
+    "f128ecfa2eb08783baadf170a46df36627b15b93096e5bc420a5b48e73ab3cbd5bb9ffba810f04ea2bb59a13a4eb1677ddd49bd23b7b6bbf9407465f91c6b976_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-ldapi-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01903.java",
+      "verdict": "benign",
+      "reason": "The attacker-controlled input from request.getHeader() flows into doSomething() at line 51, but inside doSomething() (lines 114-116) the condition ((7*42)-86 \u003e 200) evaluates to (294-86=208 \u003e 200) which is always true. This forces bar to the hardcoded constant \"This_should_always_happen\" on every invocation. The else branch that would assign bar=param is dead code. Consequently, the LDAP filter at line 60 is always built with the constant string, never with attacker data, making the tainted path unreachable at runtime.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01903.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01903.java:51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01903.java:108-119",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01903.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01903.java:63"
+      ],
+      "codeHash": "sha256:8f8e1029bc25573fdb12f9a64095692099b27d7b71dbce5de1a199d704104485",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:20:07Z",
+      "tokensUsed": 8815
+    },
+    "f34c9fedcde7795eee64bb9b68cd013a75c322e7b2a600cf9ae5b6985ca012bac601ac5dd8d5b3b8ba5c81a0fe17a7a7fe2a7f2cc28450864543386925196fa1_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.use-of-md5",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02475.java",
+      "verdict": "exploitable",
+      "reason": "Attacker-controlled HTTP request parameter flows unsanitized into an MD5 MessageDigest. The doPost handler reads request.getParameterValues(\"BenchmarkTest02475\") (line 43), passes it through doSomething() which stores and retrieves it from a HashMap with no transformation or sanitization (lines 100-111), then the value is cast to String, converted to bytes, and fed into java.security.MessageDigest.getInstance(\"MD5\") via md.update() (lines 51-66). The MD5 hash is then persisted to a file named passwordFile.txt (line 72). MD5 is cryptographically broken and unsuitable for any security-sensitive hashing. No sanitization or mitigation exists in the data path.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02475.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02475.java:48",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02475.java:51",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02475.java:53-54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02475.java:66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02475.java:68",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02475.java:100-111"
+      ],
+      "codeHash": "sha256:2374c41263a0731c80fab2c2c960cf228a2c502af83f6941a8dd3cf1688f9bf6",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:20:27Z",
+      "tokensUsed": 15315
+    },
+    "f4fa9d95d2ff19ba8cade2c7424dcb33ff01aab5f338a1f1bef780327bf28fd8e238e5d6bac70628c99abaadf6f274702f392b81bdcc640af1ea4c3ea2e54f14_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.weak-random",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01680.java",
+      "verdict": "exploitable",
+      "reason": "java.util.Random().nextInt(99) generates a non-cryptographic random integer in range 0–98. The result is converted to a string (rememberMeKey) and used as both a 'remember me' cookie value (line 101) and a session attribute (line 106) for authenticating returning users. This is a security-sensitive use: the token is an authentication credential. java.util.Random is predictable, and the 99-value keyspace is trivially brute-forceable, allowing an attacker to forge the remember-me cookie and impersonate any user.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01680.java:72-73",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01680.java:82",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01680.java:100-106"
+      ],
+      "codeHash": "sha256:492536f5bf5e1ae4ff7d2171f6c6cc8ce3d839c801d6f06d5772a46fa9678708",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:20:15Z",
+      "tokensUsed": 8327
+    },
+    "faf8f058d8a087107bfcf5ded0d5630612b66a7f52a327cf59bdf379a28f919a8c20d4192b5c3ff1fc727fcfcfa6d60920bac643e3e1a6c267394ecf8d930e8d_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.xss.no-direct-response-writer",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01597.java",
+      "verdict": "exploitable",
+      "reason": "User-controlled input from request.getParameterValues (line 43) flows through param (line 45) into Test.doSomething (line 48), where only the literal string \"_SafeStuff\" is appended (line 64) — no HTML escaping or sanitization is applied. The result bar is written directly to the HTML response via response.getWriter().write (line 54) with content-type text/html (line 41) and browser XSS filter explicitly disabled (line 50). An attacker can inject arbitrary HTML/JavaScript in the BenchmarkTest01597 parameter value.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01597.java:41",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01597.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01597.java:45",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01597.java:48",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01597.java:54",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01597.java:63-64"
+      ],
+      "codeHash": "sha256:0ca2f0ae1242a89c4a6ba37a8f1b4f77222c9142ee26a34510d369cde48f51a2",
+      "model": "deepseek-v4-pro",
+      "decidedAt": "2026-07-22T10:20:24Z",
+      "tokensUsed": 7796
+    }
+  }
+}
