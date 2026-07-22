@@ -57,7 +57,7 @@ jobs:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           base-url: https://api.deepseek.com
           max-findings-budget: 10
-          sarif: findings.sarif
+          sarif-file: findings.sarif
           link-base: https://github.com/${{ github.repository }}/blob/${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: "Publish triage report to run summary"
