@@ -28,6 +28,15 @@ from collections import defaultdict
 VERDICTS = ("benign", "exploitable", "uncertain")
 TESTCASE_RE = re.compile(r"(BenchmarkTest\d+)\.java")
 
+# Confusion-matrix rows, in the order they read best: the verdict that acts on
+# a finding first, the one that buries it second. Labels are plural-neutral so
+# they read the same at 0, 1 or 50.
+ROWS = (
+    ("exploitable", "fails the build", "✅ caught", "❌ blocked in error"),
+    ("benign", "suppressed, unseen", "❌ missed", "✅ cleared"),
+    ("uncertain", "left for a human", "— parked", "— parked"),
+)
+
 
 def verdict_of(result):
     # The action writes the verdict to properties.triage.verdict, and adds a
@@ -180,10 +189,26 @@ def main():
 
     out("## Verdict vs ground truth")
     out("")
-    out("| verdict | real vuln | designed FP |")
+    out(
+        "Rows are what the triage said; columns are what BenchmarkJava says is "
+        "true. Every test case is either a genuine flaw or a decoy built to look "
+        "vulnerable to a scanner — the scanner flags both, and telling them "
+        "apart is the whole job."
+    )
+    out("")
+    out("| triage verdict | actually vulnerable | safe by design |")
     out("|---|---|---|")
-    for v in VERDICTS:
-        out(f"| {v} | {cell[(v, True)]} | {cell[(v, False)]} |")
+    for v, note, real_lbl, fp_lbl in ROWS:
+        out(
+            f"| **{v}** — {note} | {cell[(v, True)]} {real_lbl} "
+            f"| {cell[(v, False)]} {fp_lbl} |"
+        )
+    out("")
+    out(
+        "<sub>✅ marks the correct call, ❌ the two ways to be wrong. **Missed** "
+        "is the expensive one: a real vulnerability called safe and suppressed, "
+        "so nobody ever looks at it again. A false alarm only costs a build.</sub>"
+    )
     out("")
 
     out("## Headline numbers")
