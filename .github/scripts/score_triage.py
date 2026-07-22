@@ -10,9 +10,10 @@ real vulnerabilities (the number that matters most).
 --------------------------------------------------------------------------
 ADAPT THIS ONE FUNCTION: verdict_of()
 It has to read a verdict out of a SARIF result. Right now it tries, in order:
-  1. suppressions[]  -> benign   (how the README says benign is encoded)
+  1. properties.triage.verdict  (what sast-triage@v1 actually writes)
   2. properties.verdict / properties["sast-triage"].verdict
   3. a tag that looks like "sast-triage:<verdict>"
+  4. suppressions[] -> benign, as a last-resort fallback
 If your triaged.sarif encodes verdicts differently, fix it here — everything
 else keys off this. Any result it can't classify is reported as "unlabelled"
 rather than silently miscounted.
@@ -29,14 +30,18 @@ TESTCASE_RE = re.compile(r"(BenchmarkTest\d+)\.java")
 
 
 def verdict_of(result):
-    if result.get("suppressions"):
-        return "benign"
-
+    # The action writes the verdict to properties.triage.verdict, and adds a
+    # suppressions[] entry only for benign. Read the explicit verdict first:
+    # suppressions is a projection of it, so trusting it first would flatten a
+    # suppressed non-benign verdict to "benign".
     props = result.get("properties") or {}
-    nested = props.get("sast-triage") or props.get("sast_triage") or {}
-    for src in (props, nested):
-        if not isinstance(src, dict):
-            continue
+    sources = [props]
+    for key in ("triage", "sast-triage", "sast_triage"):
+        nested = props.get(key)
+        if isinstance(nested, dict):
+            sources.append(nested)
+
+    for src in sources:
         for key in ("verdict", "triage_verdict", "sast_triage_verdict"):
             val = src.get(key)
             if isinstance(val, str) and val.lower() in VERDICTS:
@@ -49,6 +54,9 @@ def verdict_of(result):
         for v in VERDICTS:
             if low == v or low.endswith(":" + v):
                 return v
+
+    if result.get("suppressions"):
+        return "benign"
     return None
 
 
