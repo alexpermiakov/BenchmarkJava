@@ -73,7 +73,7 @@ jobs:
           echo "Triaging with $MODEL at ${base_url:-${provider} default endpoint} (key: $key_name)"
 
       - name: Triage
-        uses: alexpermiakov/sast-triage@v1
+        uses: alexpermiakov/sast-triage@main
         with:
           provider: ${{ steps.endpoint.outputs.provider }}
           model: ${{ env.MODEL }}
