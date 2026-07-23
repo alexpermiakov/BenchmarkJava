@@ -9,8 +9,12 @@ on:
         required: true
         default: deepseek-v4-pro
         options:
+          - deepseek-v4-flash
           - deepseek-v4-pro
           - kimi-k3
+          - kimi-k2.7-code
+          - claude-opus-4-8
+          - claude-sonnet-5
 
 # contents:write + pull-requests:write let the cache-review PR step push a
 # branch and open the PR. On fork PRs the token is read-only, which is why that
@@ -48,24 +52,32 @@ jobs:
         id: sample
         run: python3 .github/scripts/sample_benchmark.py findings.sarif expectedresults-1.2.csv "$SAMPLE_SIZE"
 
-      # Single place mapping a model to its endpoint and key secret. Add a
-      # provider by adding one case arm plus the matching repo secret.
+      # Single place mapping a model to its API shape, endpoint and key secret.
+      # Add a provider by adding one case arm plus the matching repo secret.
+      # An empty `provider` means "no -provider flag", which the action reads as
+      # OpenAI-compatible; Claude needs it set explicitly because a bare
+      # base-url always implies openai, never anthropic.
       - name: "Resolve endpoint for model"
         id: endpoint
         run: |
+          provider=
           case "$MODEL" in
             deepseek-*) base_url=https://api.deepseek.com/v1; key_name=OPENAI_API_KEY ;;
             kimi-*)     base_url=https://api.moonshot.ai/v1;  key_name=MOONSHOT_API_KEY ;;
+            claude-*)   base_url=; provider=anthropic;        key_name=ANTHROPIC_API_KEY ;;
             *) echo "::error::No endpoint mapping for model '$MODEL'"; exit 1 ;;
           esac
+          echo "provider=$provider" >> "$GITHUB_OUTPUT"
           echo "base_url=$base_url" >> "$GITHUB_OUTPUT"
           echo "key_name=$key_name" >> "$GITHUB_OUTPUT"
-          echo "Triaging with $MODEL at $base_url (key: $key_name)"
+          echo "Triaging with $MODEL at ${base_url:-${provider} default endpoint} (key: $key_name)"
 
       - name: Triage
         uses: alexpermiakov/sast-triage@v1
         with:
-          # provider is left unset on purpose: the action infers it from base-url.
+          # Both come from the resolve step above: empty provider + a base-url is
+          # the OpenAI-compatible path, provider=anthropic + no base-url is Claude.
+          provider: ${{ steps.endpoint.outputs.provider }}
           model: ${{ env.MODEL }}
           api-key: ${{ secrets[steps.endpoint.outputs.key_name] }}
           base-url: ${{ steps.endpoint.outputs.base_url }}
