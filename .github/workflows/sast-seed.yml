@@ -31,7 +31,7 @@ jobs:
   seed:
     runs-on: ubuntu-latest
     env:
-      SAMPLE_SIZE: 10 # test cases, not findings — see sample_benchmark.py
+      SAMPLE_SIZE: 30 # test cases, not findings — see sample_benchmark.py
       MODEL: ${{ inputs.model }}
     steps:
       - name: "Check out Git repository"
