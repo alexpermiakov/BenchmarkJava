@@ -71,7 +71,7 @@ jobs:
           base-url: ${{ steps.endpoint.outputs.base_url }}
           max-findings-budget: ${{ steps.sample.outputs.findings }}
           sarif-file: sample.sarif
-          effort: high
+          effort: large
           scope: full
           mode: baseline
           cache-write: pr
