@@ -4,15 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       model:
-        description: "Model to triage with, e.g. deepseek-v4-flash or claude-sonnet-5"
-        type: string
+        description: "Model to triage with — picks its endpoint and API key automatically"
+        type: choice
         required: true
         default: deepseek-v4-pro
-      base_url:
-        description: "OpenAI-compatible endpoint — clear it to use Claude's native API instead"
-        type: string
-        required: false
-        default: https://api.deepseek.com
+        options:
+          - deepseek-v4-pro
+          - deepseek-v4-flash
+          - kimi-k3
 
 # contents:write + pull-requests:write let the cache-review PR step push a
 # branch and open the PR. On fork PRs the token is read-only, which is why that
@@ -50,13 +49,30 @@ jobs:
         id: sample
         run: python3 .github/scripts/sample_benchmark.py findings.sarif expectedresults-1.2.csv "$SAMPLE_SIZE"
 
+      # Single place mapping a model to its endpoint and key secret. Add a
+      # provider by adding one case arm plus the matching repo secret.
+      - name: "Resolve endpoint for model"
+        id: endpoint
+        env:
+          BASE_URL_OVERRIDE: ${{ inputs.base_url_override }}
+        run: |
+          case "$MODEL" in
+            deepseek-*) base_url=https://api.deepseek.com/v1; key_name=OPENAI_API_KEY ;;
+            kimi-*)     base_url=https://api.moonshot.ai/v1;  key_name=MOONSHOT_API_KEY ;;
+            *) echo "::error::No endpoint mapping for model '$MODEL'"; exit 1 ;;
+          esac
+          if [ -n "$BASE_URL_OVERRIDE" ]; then base_url="$BASE_URL_OVERRIDE"; fi
+          echo "base_url=$base_url" >> "$GITHUB_OUTPUT"
+          echo "key_name=$key_name" >> "$GITHUB_OUTPUT"
+          echo "Triaging with $MODEL at $base_url (key: $key_name)"
+
       - name: Triage
-        uses: alexpermiakov/sast-triage@v1
+        uses: alexpermiakov/sast-triage@v1.2.6
         with:
-          provider: openai
+          # provider is left unset on purpose: the action infers it from base-url.
           model: ${{ env.MODEL }}
-          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
-          base-url: ${{ inputs.base_url }}
+          api-key: ${{ secrets[steps.endpoint.outputs.key_name] }}
+          base-url: ${{ steps.endpoint.outputs.base_url }}
           max-findings-budget: ${{ steps.sample.outputs.findings }}
           sarif-file: sample.sarif
           scope: full
