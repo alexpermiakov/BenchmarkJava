@@ -73,10 +73,8 @@ jobs:
           echo "Triaging with $MODEL at ${base_url:-${provider} default endpoint} (key: $key_name)"
 
       - name: Triage
-        uses: alexpermiakov/sast-triage@v1
+        uses: alexpermiakov/sast-triage@main
         with:
-          # Both come from the resolve step above: empty provider + a base-url is
-          # the OpenAI-compatible path, provider=anthropic + no base-url is Claude.
           provider: ${{ steps.endpoint.outputs.provider }}
           model: ${{ env.MODEL }}
           api-key: ${{ secrets[steps.endpoint.outputs.key_name] }}
