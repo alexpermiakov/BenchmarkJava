@@ -18,15 +18,50 @@ If your triaged.sarif encodes verdicts differently, fix it here — everything
 else keys off this. Any result it can't classify is reported as "unlabelled"
 rather than silently miscounted.
 --------------------------------------------------------------------------
+AND THIS TABLE: RULE_CATEGORY
+A ground-truth row asserts exactly one thing: whether *this test case's
+designated weakness* is real. It says nothing about any other weakness in the
+same file. The scanner doesn't respect that boundary — an XSS rule fires on a
+file whose row asserts SQLi — so matching findings to rows by file name alone
+scores the XSS call against CWE-89. Call it benign and you're booked for a
+missed SQL injection you never missed.
+
+So each finding gets a category from its ruleId, and only findings whose
+category matches the test case's are scored. The rest are reported as
+off-category: real calls the triage had to make, that this corpus cannot
+adjudicate either way. A scanner whose rules aren't in the table below scores
+nothing, loudly, instead of scoring everything against the wrong rows.
+--------------------------------------------------------------------------
 """
 import argparse
 import json
 import re
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 VERDICTS = ("benign", "exploitable", "uncertain")
 TESTCASE_RE = re.compile(r"(BenchmarkTest\d+)\.java")
+
+# ruleId substring -> BenchmarkJava category, first match wins. Covers every
+# opengrep java rule that fires on the corpus. Note BenchmarkJava splits weak
+# crypto in two: `hash` is CWE-328 (SHA-1, MD5), `crypto` is CWE-327 (DES).
+RULE_CATEGORY = (
+    ("no-direct-response-writer", "xss"),
+    ("tainted-sql-from-http-request", "sqli"),
+    ("jdbc-sqli", "sqli"),
+    ("httpservlet-path-traversal", "pathtraver"),
+    ("weak-random", "weakrand"),
+    ("tainted-cmd-from-http-request", "cmdi"),
+    ("command-injection-process-builder", "cmdi"),
+    ("desede-is-deprecated", "crypto"),
+    ("des-is-deprecated", "crypto"),
+    ("use-of-sha1", "hash"),
+    ("use-of-md5", "hash"),
+    ("tainted-session-from-http-request", "trustbound"),
+    ("tainted-ldapi-from-http-request", "ldapi"),
+    ("cookie-missing-secure-flag", "securecookie"),
+    ("tainted-xpath-from-http-request", "xpathi"),
+)
 
 # Confusion-matrix rows, in the order they read best: the verdict that acts on
 # a finding first, the one that buries it second. Labels are plural-neutral so
@@ -69,6 +104,15 @@ def verdict_of(result):
     return None
 
 
+def rule_category(result):
+    """The weakness class a finding's rule targets, or None if unmapped."""
+    rule = (result.get("ruleId") or "").lower()
+    for needle, cat in RULE_CATEGORY:
+        if needle in rule:
+            return cat
+    return None
+
+
 def testcase_of(result):
     for loc in result.get("locations", []):
         uri = (
@@ -79,6 +123,12 @@ def testcase_of(result):
         m = TESTCASE_RE.search(uri)
         if m:
             return m.group(1)
+    return None
+
+
+def line_of(result):
+    for loc in result.get("locations", []):
+        return loc.get("physicalLocation", {}).get("region", {}).get("startLine")
     return None
 
 
@@ -113,6 +163,10 @@ def pct(num, den):
     return f"{num / den * 100:.1f}%" if den else "n/a"
 
 
+def n_of(count, word, plural=None):
+    return f"{count} {word if count == 1 else plural or word + 's'}"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("triaged_sarif")
@@ -124,9 +178,12 @@ def main():
     doc = json.load(open(args.triaged_sarif))
     results = [r for run in doc.get("runs", []) for r in run.get("results", [])]
 
-    cell = defaultdict(int)          # (verdict, is_real) -> count
-    per_test = defaultdict(set)      # test -> {verdicts}
-    unlabelled, unmapped = [], 0
+    cell = defaultdict(int)          # (verdict, is_real) -> count, on-category
+    sink = defaultdict(set)          # (test, line) -> {verdicts}, on-category
+    per_test = defaultdict(list)     # test -> [(verdict, on_category)], all
+    off = defaultdict(lambda: defaultdict(int))  # (rule cat, row cat) -> verdicts
+    unmapped_rules = Counter()
+    unlabelled, unmapped, n_off = [], 0, 0
     per_cat = defaultdict(lambda: defaultdict(int))
 
     for r in results:
@@ -139,41 +196,74 @@ def main():
             unlabelled.append(location_of(r))
             continue
         real = truth[tc]["real"]
-        cell[(v, real)] += 1
-        per_test[tc].add(v)
-        per_cat[truth[tc]["category"]][(v, real)] += 1
+        row_cat = truth[tc]["category"]
+        cat = rule_category(r)
+        # Only a finding whose rule targets the weakness the row is about can be
+        # scored against that row; see the note at the top of this script.
+        on_category = cat == row_cat
+        per_test[tc].append((v, on_category))
+        if on_category:
+            cell[(v, real)] += 1
+            sink[(tc, line_of(r))].add(v)
+            per_cat[row_cat][(v, real)] += 1
+        else:
+            n_off += 1
+            off[(cat or "unmapped rule", row_cat)][v] += 1
+            if cat is None:
+                unmapped_rules[r.get("ruleId") or "<none>"] += 1
 
     scored = sum(cell.values())
     if scored == 0:
         sys.exit(
-            "no findings scored. Either the paths don't match the CSV, or "
-            "verdict_of() can't read your verdict encoding — see the note at "
-            "the top of this script."
+            "no findings scored. Either the paths don't match the CSV, "
+            "verdict_of() can't read your verdict encoding, or no rule in "
+            "RULE_CATEGORY matches your scanner — see the notes at the top of "
+            "this script."
         )
 
     n_benign = cell[("benign", True)] + cell[("benign", False)]
     n_expl = cell[("exploitable", True)] + cell[("exploitable", False)]
     n_unc = cell[("uncertain", True)] + cell[("uncertain", False)]
 
-    # end-to-end per test case
+    # Same gate precision counted over distinct sink locations. Two rules firing
+    # on one line (des + desede, say) are two findings but one vulnerability, so
+    # the per-finding number quietly counts the same catch twice.
+    sink_expl = [k for k, vs in sink.items() if "exploitable" in vs]
+    sink_expl_real = [k for k in sink_expl if truth[k[0]]["real"]]
+
+    # end-to-end per test case. Gating is category-blind on purpose: a build
+    # fails, and a human looks at the file, whatever rule raised the alarm.
+    verdicts_of = {t: {v for v, _ in fs} for t, fs in per_test.items()}
     real_tests = [t for t in per_test if truth[t]["real"]]
-    gated = [t for t in real_tests if "exploitable" in per_test[t]]
+    gated = [t for t in real_tests if "exploitable" in verdicts_of[t]]
+    on_cat_gated = [
+        t for t in gated if any(v == "exploitable" and on for v, on in per_test[t])
+    ]
+    lucky = [t for t in gated if t not in on_cat_gated]
     parked = [
         t for t in real_tests
-        if "exploitable" not in per_test[t] and "uncertain" in per_test[t]
+        if "exploitable" not in verdicts_of[t] and "uncertain" in verdicts_of[t]
     ]
-    suppressed = sorted(
-        t for t in real_tests if per_test[t] == {"benign"}
-    )
-    # Real test cases where some finding was called benign but a sibling wasn't:
-    # the file is still gated or parked, so those benign calls buried nothing.
-    # These are the gap between the finding-level and file-level miss numbers,
-    # and the reason the sample has to be drawn over test cases — see
-    # sample_benchmark.py.
-    part_benign = [t for t in real_tests if "benign" in per_test[t]]
-    rescued = [t for t in part_benign if per_test[t] != {"benign"}]
+    suppressed = sorted(t for t in real_tests if verdicts_of[t] == {"benign"})
+    # Real test cases the scanner only ever flagged for some other weakness: the
+    # row's own vulnerability was never surfaced, so the triage was never asked
+    # about it. They still count as gated/buried — that is a property of the
+    # file, not of the rule — but they can't be credited as a catch, and when
+    # they land in `suppressed` what the triage buried was unrelated noise.
+    never_surfaced = {t for t in real_tests if not any(on for _, on in per_test[t])}
+    blind_suppressed = [t for t in suppressed if t in never_surfaced]
+    # Real test cases where some on-category finding was called benign but a
+    # sibling wasn't: the file is still gated or parked, so those benign calls
+    # buried nothing. These are the gap between the finding-level and file-level
+    # miss numbers, and the reason the sample has to be drawn over test cases —
+    # see sample_benchmark.py.
+    part_benign = [
+        t for t in real_tests
+        if any(v == "benign" and on for v, on in per_test[t])
+    ]
+    rescued = [t for t in part_benign if verdicts_of[t] != {"benign"}]
     fp_tests = [t for t in per_test if not truth[t]["real"]]
-    fp_gated = [t for t in fp_tests if "exploitable" in per_test[t]]
+    fp_gated = [t for t in fp_tests if "exploitable" in verdicts_of[t]]
 
     out = print
     hdr = "# sast-triage — BenchmarkJava scorecard"
@@ -185,6 +275,12 @@ def main():
         f"Scored **{scored} findings** over **{len(per_test)} test cases** — "
         f"{n_expl} exploitable, {n_benign} benign, {n_unc} uncertain."
     )
+    if n_off:
+        out(
+            f"_{n_off} further findings fired a rule for a weakness their test "
+            "case's row says nothing about and cannot be scored either way — "
+            "see [Off-category findings](#off-category-findings-not-scored)._"
+        )
     if unmapped:
         out(f"_{unmapped} findings had no ground-truth row and were skipped._")
     if unlabelled:
@@ -215,9 +311,11 @@ def main():
         "<sub>✅ marks the correct call, ❌ the two ways to be wrong. **Missed** "
         "is the expensive one: a real vulnerability called safe and suppressed, "
         "so nobody ever looks at it again. A false alarm only costs a build. "
-        "These are per finding — a miss here is only a real miss if every other "
-        "finding on the same file was suppressed too, which is what the "
-        "per-vulnerability section below counts.</sub>"
+        "Only findings whose rule targets the weakness the test case is built "
+        "around appear here — the row can't adjudicate any other rule. These are "
+        "per finding — a miss here is only a real miss if every other finding on "
+        "the same file was suppressed too, which is what the per-vulnerability "
+        "section below counts.</sub>"
     )
     out("")
 
@@ -229,6 +327,11 @@ def main():
         f"| Gate precision | **{pct(cell[('exploitable', True)], n_expl)}** "
         f"({cell[('exploitable', True)]}/{n_expl}) | of blocked findings, "
         "how many were real |"
+    )
+    out(
+        f"| — per sink location | {pct(len(sink_expl_real), len(sink_expl))} "
+        f"({len(sink_expl_real)}/{len(sink_expl)}) | same, counting one "
+        "flagged line once however many rules fired on it |"
     )
     out(
         f"| False suppression rate | **{pct(cell[('benign', True)], n_benign)}** "
@@ -259,15 +362,63 @@ def main():
         f"({pct(len(suppressed), len(real_tests))}) — **the failure mode that matters**"
     )
     out("")
-    out(
-        f"Counted per finding instead, {cell[('benign', True)]} findings on real "
-        f"vulnerabilities were called benign. Those fall on {len(part_benign)} "
-        f"test cases, and {len(rescued)} of them kept a sibling finding the "
-        "triage did not suppress — the vulnerability still reaches a human, so "
-        "nothing was buried. The finding-level count is always the larger of the "
-        "two and is not the number to quote."
-    )
-    out("")
+    if lucky:
+        out(
+            f"{len(lucky)} of the gated test cases were gated only by a finding "
+            "for a *different* weakness than the row asserts. The build still "
+            "fails and a human still reads the file, but the triage was not "
+            "credited with catching the vulnerability itself."
+        )
+        out("")
+    if never_surfaced:
+        one = len(never_surfaced) == 1
+        para = (
+            f"⚠ {n_of(len(never_surfaced), 'real test case')} "
+            f"{'was' if one else 'were'} never flagged for "
+            f"{'its' if one else 'their'} own weakness at all — the scanner only "
+            f"fired rules for other things on {'it' if one else 'them'}, so the "
+            "triage was never asked the question the row is about. "
+            f"{'It is' if one else 'They are'} counted above because gating and "
+            "burying are properties of the file, not of the rule that raised the "
+            "alarm."
+        )
+        if blind_suppressed:
+            para += (
+                f" {len(blind_suppressed)} of those "
+                f"{'sits' if len(blind_suppressed) == 1 else 'sit'} in the "
+                "suppressed count: what the triage buried there was unrelated "
+                "noise on a file whose real vulnerability the scanner never "
+                "surfaced."
+            )
+        out(para)
+        out("")
+    if part_benign:
+        n = cell[("benign", True)]
+        buried = len(part_benign) - len(rescued)
+        para = (
+            f"Counted per finding instead, {n_of(n, 'finding')} on real "
+            f"vulnerabilities {'was' if n == 1 else 'were'} called benign — "
+            "findings for the weakness the row is actually about — falling on "
+            f"{n_of(len(part_benign), 'test case')}. "
+        )
+        if rescued:
+            para += (
+                f"{len(rescued)} of those kept a sibling finding the triage did "
+                "not suppress, so the vulnerability still reaches a human, "
+                f"leaving {n_of(buried, 'file')} buried by a call on the row's "
+                "own weakness. "
+            )
+        else:
+            para += (
+                "None kept a sibling the triage left standing, so "
+                f"{'it' if buried == 1 else f'all {buried}'} stayed buried. "
+            )
+        para += (
+            "Quote the file-level number, not the finding-level one: a file can "
+            "carry several findings and only needs one survivor to reach a human."
+        )
+        out(para)
+        out("")
     out(
         f"False alarms at the gate: **{len(fp_gated)}** of {len(fp_tests)} "
         "designed-FP test cases would block a build."
@@ -297,12 +448,43 @@ def main():
             f"{c[('benign', True)]}/{b} |"
         )
     out("")
+
+    if n_off:
+        out("## Off-category findings (not scored)")
+        out("")
+        out(
+            f"{n_off} findings fired a rule for a weakness their test case's "
+            "ground-truth row says nothing about — an XSS rule on a file whose "
+            "row asserts SQLi, say. The row can neither confirm nor refute them, "
+            "so scoring them against it would invent both catches and misses. "
+            "They are listed here instead."
+        )
+        out("")
+        out("| rule targets | row asserts | findings | exploitable | benign | uncertain |")
+        out("|---|---|---|---|---|---|")
+        for key in sorted(off, key=lambda k: (-sum(off[k].values()), k)):
+            rule_cat, row_cat = key
+            c = off[key]
+            out(
+                f"| {rule_cat} | {row_cat} | {sum(c.values())} | "
+                f"{c['exploitable']} | {c['benign']} | {c['uncertain']} |"
+            )
+        out("")
+        if unmapped_rules:
+            top = ", ".join(f"`{r}` ({n})" for r, n in unmapped_rules.most_common(5))
+            out(
+                f"<sub>⚠ {sum(unmapped_rules.values())} of those came from rules "
+                f"with no entry in `RULE_CATEGORY` ({top}) — add them there to "
+                "bring those findings into the scored set.</sub>"
+            )
+            out("")
+
     out(
-        "<sub>Ground truth: OWASP BenchmarkJava `expectedresults-1.2.csv`. "
-        "Findings are matched to test cases by file name; a finding whose rule "
-        "targets a different weakness than the test case is scored against that "
-        "test case anyway, which can overstate false suppressions. On a sampled "
-        "run, test cases are drawn uniformly within each rule stratum and every "
+        "<sub>Ground truth: OWASP BenchmarkJava `expectedresults-1.2.csv`. Each "
+        "row asserts one weakness for one file, so a finding is scored only when "
+        "its rule targets that same weakness; everything else is reported "
+        "separately rather than scored against the wrong row. On a sampled run, "
+        "test cases are drawn uniformly within each rule stratum and every "
         "finding on a drawn test case is included, so the per-vulnerability "
         "numbers above are unbiased for the full corpus.</sub>"
     )

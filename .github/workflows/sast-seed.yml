@@ -53,15 +53,12 @@ jobs:
       # provider by adding one case arm plus the matching repo secret.
       - name: "Resolve endpoint for model"
         id: endpoint
-        env:
-          BASE_URL_OVERRIDE: ${{ inputs.base_url_override }}
         run: |
           case "$MODEL" in
             deepseek-*) base_url=https://api.deepseek.com/v1; key_name=OPENAI_API_KEY ;;
             kimi-*)     base_url=https://api.moonshot.ai/v1;  key_name=MOONSHOT_API_KEY ;;
             *) echo "::error::No endpoint mapping for model '$MODEL'"; exit 1 ;;
           esac
-          if [ -n "$BASE_URL_OVERRIDE" ]; then base_url="$BASE_URL_OVERRIDE"; fi
           echo "base_url=$base_url" >> "$GITHUB_OUTPUT"
           echo "key_name=$key_name" >> "$GITHUB_OUTPUT"
           echo "Triaging with $MODEL at $base_url (key: $key_name)"
@@ -75,6 +72,7 @@ jobs:
           base-url: ${{ steps.endpoint.outputs.base_url }}
           max-findings-budget: ${{ steps.sample.outputs.findings }}
           sarif-file: sample.sarif
+          effort: high
           scope: full
           mode: baseline
           cache-write: pr
