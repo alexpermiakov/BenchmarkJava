@@ -63,7 +63,7 @@ jobs:
           echo "Triaging with $MODEL at $base_url (key: $key_name)"
 
       - name: Triage
-        uses: alexpermiakov/sast-triage@v1.2.6
+        uses: alexpermiakov/sast-triage@v1.2.7
         with:
           # provider is left unset on purpose: the action infers it from base-url.
           model: ${{ env.MODEL }}
