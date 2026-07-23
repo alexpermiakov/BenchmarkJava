@@ -165,6 +165,13 @@ def main():
     suppressed = sorted(
         t for t in real_tests if per_test[t] == {"benign"}
     )
+    # Real test cases where some finding was called benign but a sibling wasn't:
+    # the file is still gated or parked, so those benign calls buried nothing.
+    # These are the gap between the finding-level and file-level miss numbers,
+    # and the reason the sample has to be drawn over test cases — see
+    # sample_benchmark.py.
+    part_benign = [t for t in real_tests if "benign" in per_test[t]]
+    rescued = [t for t in part_benign if per_test[t] != {"benign"}]
     fp_tests = [t for t in per_test if not truth[t]["real"]]
     fp_gated = [t for t in fp_tests if "exploitable" in per_test[t]]
 
@@ -207,7 +214,10 @@ def main():
     out(
         "<sub>✅ marks the correct call, ❌ the two ways to be wrong. **Missed** "
         "is the expensive one: a real vulnerability called safe and suppressed, "
-        "so nobody ever looks at it again. A false alarm only costs a build.</sub>"
+        "so nobody ever looks at it again. A false alarm only costs a build. "
+        "These are per finding — a miss here is only a real miss if every other "
+        "finding on the same file was suppressed too, which is what the "
+        "per-vulnerability section below counts.</sub>"
     )
     out("")
 
@@ -226,6 +236,11 @@ def main():
         "how many sat on a real vuln |"
     )
     out(
+        f"| Vulnerabilities buried | **{pct(len(suppressed), len(real_tests))}** "
+        f"({len(suppressed)}/{len(real_tests)}) | of real vulns, how many had "
+        "*every* finding suppressed |"
+    )
+    out(
         f"| Noise removed | {pct(cell[('benign', False)], sum(cell[(v, False)] for v in VERDICTS))} "
         "| of the scanner's false positives, how many were cleared |"
     )
@@ -242,6 +257,15 @@ def main():
     out(
         f"- **{len(suppressed)}** silently suppressed "
         f"({pct(len(suppressed), len(real_tests))}) — **the failure mode that matters**"
+    )
+    out("")
+    out(
+        f"Counted per finding instead, {cell[('benign', True)]} findings on real "
+        f"vulnerabilities were called benign. Those fall on {len(part_benign)} "
+        f"test cases, and {len(rescued)} of them kept a sibling finding the "
+        "triage did not suppress — the vulnerability still reaches a human, so "
+        "nothing was buried. The finding-level count is always the larger of the "
+        "two and is not the number to quote."
     )
     out("")
     out(
@@ -277,7 +301,10 @@ def main():
         "<sub>Ground truth: OWASP BenchmarkJava `expectedresults-1.2.csv`. "
         "Findings are matched to test cases by file name; a finding whose rule "
         "targets a different weakness than the test case is scored against that "
-        "test case anyway, which can overstate false suppressions.</sub>"
+        "test case anyway, which can overstate false suppressions. On a sampled "
+        "run, test cases are drawn uniformly within each rule stratum and every "
+        "finding on a drawn test case is included, so the per-vulnerability "
+        "numbers above are unbiased for the full corpus.</sub>"
     )
 
 

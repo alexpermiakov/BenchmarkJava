@@ -29,7 +29,7 @@ jobs:
   seed:
     runs-on: ubuntu-latest
     env:
-      SAMPLE_SIZE: 100
+      SAMPLE_SIZE: 100   # test cases, not findings — see sample_benchmark.py
       MODEL: deepseek-v4-pro
     steps:
       - name: "Check out Git repository"
@@ -44,7 +44,10 @@ jobs:
           opengrep scan -f /tmp/rules/java \
             --sarif --dataflow-traces --output findings.sarif
 
+      # SAMPLE_SIZE is a number of test cases; the sample carries every finding
+      # on them, so the budget below comes from the script's `findings` output.
       - name: "Sample findings"
+        id: sample
         run: python3 .github/scripts/sample_benchmark.py findings.sarif expectedresults-1.2.csv "$SAMPLE_SIZE"
 
       - name: Triage
@@ -54,7 +57,7 @@ jobs:
           model: ${{ env.MODEL }}
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           base-url: https://api.deepseek.com
-          max-findings-budget: ${{ env.SAMPLE_SIZE }}
+          max-findings-budget: ${{ steps.sample.outputs.findings }}
           sarif-file: sample.sarif
           effort: xlarge
           scope: full
