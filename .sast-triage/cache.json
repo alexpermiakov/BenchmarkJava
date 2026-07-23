@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "entries": {
+    "0b026a627194a453e904a46ff34d9ee8b71e31e288e754718bc07b5d86d443b050a4ddf38ebc24a03929a9e4e4d0371e54fcee99ead0199b7af0481522223ac1_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.des-is-deprecated",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01829.java",
+      "verdict": "exploitable",
+      "reason": "The flagged line generates a DES key via KeyGenerator.getInstance(\"DES\") and uses it to initialize a Cipher whose algorithm comes from benchmark.properties, which is configured as DES/ECB/PKCS5Padding. In doPost, an attacker-controlled cookie value (request.getCookies -\u003e URLDecoder.decode) flows through doSomething into 'bar', is encrypted with this DES/ECB cipher (c.doFinal), and the result is persisted to passwordFile.txt. DES (and ECB mode) provide inadequate encryption strength for sensitive data; there is no sanitization or mitigation for the weak algorithm, so the defect is real and reachable via a deployed servlet endpoint.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01829.java:54-66",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01829.java:72-77",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01829.java:94-105",
+        "src/main/resources/benchmark.properties:2"
+      ],
+      "codeHash": "sha256:3dda3e4d11e9223cdede8c0eb2268678b58977ebfd3216b43555d20123503512",
+      "model": "kimi-k3",
+      "decidedAt": "2026-07-23T19:34:22Z",
+      "tokensUsed": 9118
+    },
+    "19488dd5a3fcd1c81de99e312819262d164583ac3e4d030328df67f0ef3358c21dfb7b12f07f0eaa4abd9963ffa1af47fcd7d8dc52e9bffaed09aece47c87455_0": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02202.java",
+      "verdict": "benign",
+      "reason": "Although 'param' is attacker-controlled (request.getParameterMap at line 43), the helper doSomething never returns it: the condition (7 * 42) - 86 \u003e 200 evaluates to 208 \u003e 200, a compile-time constant true, so 'bar' is always the literal \"This_should_always_happen\" (lines 85-87). Therefore fileName = Utils.TESTFILES_DIR + a fixed constant (line 56), and the FileOutputStream sink at line 58 receives no attacker-controlled data. No path traversal is possible.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02202.java:50",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02202.java:56-58",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02202.java:79-90"
+      ],
+      "codeHash": "sha256:61b43086a9caf1d9fd921db6f2edaf42fda00a6e03ddf4b21675c2d51c29dfb7",
+      "model": "kimi-k3",
+      "decidedAt": "2026-07-23T19:33:54Z",
+      "tokensUsed": 4453
+    },
+    "19488dd5a3fcd1c81de99e312819262d164583ac3e4d030328df67f0ef3358c21dfb7b12f07f0eaa4abd9963ffa1af47fcd7d8dc52e9bffaed09aece47c87455_1": {
+      "ruleId": "tmp.rules.java.lang.security.httpservlet-path-traversal",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02202.java",
+      "verdict": "benign",
+      "reason": "The taint from the request parameter is broken in doSomething(): (7*42)-86 evaluates to 208, which is always \u003e 200, so bar is unconditionally assigned the constant string 'This_should_always_happen' and never the attacker-controlled param. Therefore fileName = TESTFILES_DIR + constant is not attacker-controlled at the FileOutputStream sink; the scanner's propagator hops through 'bar' are incorrect. No path traversal is possible.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02202.java:43-47",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02202.java:50",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02202.java:56-58",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest02202.java:84-87"
+      ],
+      "codeHash": "sha256:7e80057818385bf86d71c355816ec95c3fc497cf04001cf4ef09c412a8f1832c",
+      "model": "kimi-k3",
+      "decidedAt": "2026-07-23T19:33:50Z",
+      "tokensUsed": 4369
+    },
+    "4222e7168ebfdde4bd4cfeeaac2a3733b926f19a718f215091d05893df762b4806a60f009ba6c824f5db8bdfda890d79da7fe3dcd604d98db292186ca1e8a5ba_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.tainted-ldapi-from-http-request",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01568.java",
+      "verdict": "exploitable",
+      "reason": "The servlet mapped to /ldapi-00/BenchmarkTest01568 reads attacker-controlled input via request.getParameterValues(\"BenchmarkTest01568\") (line 43), assigns it to param (45), and passes it through Test.doSomething (48). doSomething (lines 112-116) only performs a base64 encode-then-decode round trip, returning the input unchanged — it strips nothing. The result is concatenated unsanitized into an LDAP search filter at line 57 (\"(\u0026(objectclass=person)(uid=\" + bar + \"))\") and executed by ctx.search(base, filter, sc) at line 60. No encodeForLDAP or any other LDAP escaping occurs on this path; the ESAPI encoding in LDAPManager.java:108-111 belongs to a private, unused search method and does not apply. The repo's own expected-results file (expectedresults-1.2.csv:1569) also labels this test case a true LDAP-injection positive.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01568.java:43",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01568.java:45-48",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01568.java:57",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01568.java:60",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01568.java:107-120",
+        "src/main/java/org/owasp/benchmark/helpers/LDAPManager.java:98-134",
+        "expectedresults-1.2.csv:1569"
+      ],
+      "codeHash": "sha256:b871b7ae27277f8743c49203a909166de9a5bf007686ba6454973ca57c8df1b4",
+      "model": "kimi-k3",
+      "decidedAt": "2026-07-23T19:34:42Z",
+      "tokensUsed": 83152
+    },
+    "fe607636a96be919548da9ff0319c54680e3b220ca8c7b7b8f378783f5af2a151a14e9f0cd41031b4eb7276a9a6cdbfd04b29f32bdbbe02f5792ba2e38282aa5_0": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.use-of-sha1",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01503.java",
+      "verdict": "exploitable",
+      "reason": "The servlet explicitly instantiates the SHA1 MessageDigest algorithm (line 56, with fallback at line 58) and uses it to hash data (md.update/md.digest at lines 74-76), writing the resulting hash to a file named 'passwordFile.txt' (lines 77-86). The flagged defect — use of the collision-broken SHA1 algorithm — is real and reachable whenever doGet/doPost executes; no configuration or conditional replaces SHA1 with a stronger algorithm. The exact input hashed (constant 'bob' via the switch on 'B' at lines 120-128) does not change the fact that a weak hash algorithm is deliberately selected and used.",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01503.java:56",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01503.java:58",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01503.java:74-86"
+      ],
+      "codeHash": "sha256:6caf07d0732a855762dee1e7fcc5884118989821bd6a0dc951d37c40ff6bce47",
+      "model": "kimi-k3",
+      "decidedAt": "2026-07-23T19:34:36Z",
+      "tokensUsed": 3871
+    },
+    "fe607636a96be919548da9ff0319c54680e3b220ca8c7b7b8f378783f5af2a151a14e9f0cd41031b4eb7276a9a6cdbfd04b29f32bdbbe02f5792ba2e38282aa5_1": {
+      "ruleId": "tmp.rules.java.lang.security.audit.crypto.use-of-sha1",
+      "file": "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01503.java",
+      "verdict": "exploitable",
+      "reason": "The flagged defect is real and reachable: doPost unconditionally instantiates a SHA1 MessageDigest (lines 56 and 58), hashes a value treated as sensitive (md.update at line 74, md.digest at line 76), and stores the resulting hash in 'passwordFile.txt' (lines 77-86), i.e., a password-storage context where SHA1's lack of collision resistance matters. The algorithm string is hardcoded, so no configuration prevents the weak hash; the weakness is in the algorithm choice itself, which is exactly what CWE-328 flags. (In this particular flow the switch at lines 123-137 selects case 'B', so the hashed value is the constant 'bob', but the flagged defect — use of SHA1 for hashing sensitive values — is present and executed regardless.)",
+      "evidence": [
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01503.java:56-58",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01503.java:74-87",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01503.java:45-48",
+        "src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01503.java:119-137"
+      ],
+      "codeHash": "sha256:ba273e09f449c6a359681aaceee5ae7dfd31750907349323c122ec71263f00c3",
+      "model": "kimi-k3",
+      "decidedAt": "2026-07-23T19:34:51Z",
+      "tokensUsed": 4156
+    }
+  }
+}
