@@ -56,6 +56,7 @@ jobs:
           base-url: https://api.deepseek.com
           max-findings-budget: ${{ env.SAMPLE_SIZE }}
           sarif-file: sample.sarif
+          effort: large
           scope: full
           mode: baseline
           cache-write: pr
