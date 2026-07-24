@@ -31,7 +31,7 @@ jobs:
   seed:
     runs-on: ubuntu-latest
     env:
-      SAMPLE_SIZE: 30 # test cases, not findings — see sample_benchmark.py
+      SAMPLE_SIZE: 10 # test cases, not findings — see sample_benchmark.py
       MODEL: ${{ inputs.model }}
     steps:
       - name: "Check out Git repository"
@@ -73,13 +73,14 @@ jobs:
           echo "Triaging with $MODEL at ${base_url:-${provider} default endpoint} (key: $key_name)"
 
       - name: Triage
-        uses: alexpermiakov/sast-triage@main
+        uses: alexpermiakov/sast-triage@v1
         with:
           provider: ${{ steps.endpoint.outputs.provider }}
           model: ${{ env.MODEL }}
           api-key: ${{ secrets[steps.endpoint.outputs.key_name] }}
           base-url: ${{ steps.endpoint.outputs.base_url }}
           max-findings-budget: ${{ steps.sample.outputs.findings }}
+          parallel: 3
           sarif-file: sample.sarif
           effort: large
           scope: full
