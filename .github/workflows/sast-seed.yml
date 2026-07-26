@@ -13,7 +13,7 @@ on:
           - deepseek-v4-pro
           - kimi-k3
           - kimi-k2.7-code
-          - claude-opus-4-8
+          - claude-opus-5
           - claude-sonnet-5
 
 # contents:write + pull-requests:write let the cache-review PR step push a
@@ -80,7 +80,7 @@ jobs:
           api-key: ${{ secrets[steps.endpoint.outputs.key_name] }}
           base-url: ${{ steps.endpoint.outputs.base_url }}
           max-findings-budget: ${{ steps.sample.outputs.findings }}
-          parallel: 3
+          # parallel: 3
           sarif-file: sample.sarif
           effort: large
           scope: full
